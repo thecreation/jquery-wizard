@@ -16,29 +16,38 @@
 </head>
 <body>
 <!--[if lt IE 7]>
-  <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+	<p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
 <![endif]-->
 
 <div class="wizard">
-  <ul class="steps" role="tablist">
-    <li data-target="#step1" class="active" role="tab">
-      Step 1
-    </li>
-    <li data-target="#step2" role="tab">
-      Step 2
-    </li>
-    <li data-target="#step3" role="tab">
-      Step 3
-    </li>
-  </ul>
+	<ul class="steps" role="tablist">
+		<li data-target="#step1" class="active" role="tab">
+			Step 1
+		</li>
+		<li data-target="#step2" role="tab">
+			Step 2
+		</li>
+		<li data-target="#step3" role="tab">
+			Step 3
+		</li>
+	</ul>
 </div>
 <div class="step-content">
-  <div class="step-pane active" id="step1" role="tabpanel">This is step 1</div>
-  <div class="step-pane" id="step2" role="tabpanel">This is step 2</div>
-  <div class="step-pane" id="step3" role="tabpanel">This is step 3</div>
+	<div class="step-pane active" id="step1" role="tabpanel">This is step 1</div>
+	<div class="step-pane" id="step2" role="tabpanel">This is step 2</div>
+	<div class="step-pane" id="step3" role="tabpanel">This is step 3</div>
 </div>
 
 <script src="../libs/jquery/jquery.js"></script>
 <script src="../dist/jquery-wizard.js"></script>
+
+<script type="text/javascript">
+
+(function(){
+		$('.wizard').wizard({
+			step: '.steps > li'
+		});
+})();
+</script>
 </body>
 </html>

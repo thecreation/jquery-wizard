@@ -1,52 +1,55 @@
 Wizard.defaults = {
-    classes: {
-        indicator: {
-            done: 'done',
-            error: 'error',
-            current: 'current',
-            disabled: 'disabled'
-        },
+  step: '.steps > li',
 
-        panel: {
-            show: 'active',
-            hide: ''
-        }
+  classes: {
+    step: {
+      done: 'done',
+      error: 'error',
+      active: 'active',
+      disabled: 'disabled'
     },
 
-    keyNavigation: true,
-    contentCache: true,
+    panel: {
+      active: 'active',
+      activing: 'activing'
+    }
+  },
 
-    buttons: {
-        next: {
-            label: 'Next',
-        },
-        previous: {
-            label: 'Previous',
-        },
-        finish: {
-            lable: 'Finish'
-        },
+  keyNavigation: true,
+  contentCache: true,
+
+  buttons: {
+    next: {
+      label: 'Next',
     },
-    hideButtonsOnDisabled: true,
+    previous: {
+      label: 'Previous',
+    },
+    finish: {
+      lable: 'Finish'
+    },
+  },
 
-    onReset: null,
+  hideButtonsOnDisabled: true,
 
-    onNext: null,
-    onPreview: null,
-    onFirst: null,
-    onLast: null,
+  onReset: null,
 
-    onShow: null,
-    onHide: null,
+  onNext: null,
+  onPreview: null,
+  onFirst: null,
+  onLast: null,
 
-    onInit: null,
-    onDestroy: null,
+  onShow: null,
+  onHide: null,
 
-    onChanging: null,
-    onChanged: null,
+  onInit: null,
+  onDestroy: null,
 
-    onFinishing: null,
-    onFinished: null,
+  onChanging: null,
+  onChanged: null,
 
-    onContentLoaded: null,
+  onFinishing: null,
+  onFinished: null,
+
+  onContentLoaded: null,
 };

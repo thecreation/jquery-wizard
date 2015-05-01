@@ -24,11 +24,11 @@ module.exports = function(grunt) {
             dist: {
                 src: [
                     'src/intro.js',
+                    'src/support.js',
                     'src/setup.js',
                     'src/util.js',
                     'src/defaults.js',
                     'src/step.js',
-                    'src/private.js',
                     'src/public.js',
                     'src/outro.js'
                 ],
@@ -89,6 +89,37 @@ module.exports = function(grunt) {
             }
         },
 
+        // -- less config ----------------------------------------------------------
+        less: {
+            dist: {
+                files: {
+                    'css/wizard.css': ['less/wizard.less']
+                }
+            }
+        },
+
+        // -- autoprefixer config ----------------------------------------------------------
+        autoprefixer: {
+            options: {
+                browsers: [
+                    "Android 2.3",
+                    "Android >= 4",
+                    "Chrome >= 20",
+                    "Firefox >= 24",
+                    "Explorer >= 8",
+                    "iOS >= 6",
+                    "Opera >= 12",
+                    "Safari >= 6"
+                ]
+            },
+            src: {
+                expand: true,
+                cwd: 'css/',
+                src: ['*.css', '!*.min.css'],
+                dest: 'css/'
+            }
+        },
+
         // -- watch config ------------------------------------------------------------
         watch: {
             gruntfile: {
@@ -98,6 +129,18 @@ module.exports = function(grunt) {
             src: {
                 files: '<%= concat.dist.src %>',
                 tasks: ['dist']
+            }
+        },
+
+        // -- csscomb config ---------------------------------------------------------
+        csscomb: {
+            options: {
+              config: '.csscomb.json'
+            },
+            dist: {
+                files: {
+                    'css/wizard.css': ['css/wizard.css'],
+                },
             }
         },
 
@@ -128,4 +171,6 @@ module.exports = function(grunt) {
     grunt.registerTask('version', [
         'replace:bower'
     ]);
+
+    grunt.registerTask('css', ['less', 'csscomb', 'autoprefixer']);
 };

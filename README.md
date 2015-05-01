@@ -1,6 +1,6 @@
 #[jquery-wizard](https://github.com/amazingSurge/jquery-wizard) ![bower][bower-image] [![devDependency status][devdeps-image]][devdeps-link]
 
-`jquery-wizard` is a lightweight, pure javascript library for attaching callbacks to breakpoints. 
+`jquery-wizard` is a lightweight jquery plugin for creating wizard contents. 
 
 ##Getting jquery-wizard
 
@@ -41,12 +41,6 @@ review the [guidelines for contributing](CONTRIBUTING.md). Make sure you're usin
 
 * [Bug reports](CONTRIBUTING.md#bug-reports)
 * [Feature requests](CONTRIBUTING.md#feature-requests)
-
-## Browser Support
-
-- [`matchMedia` browser support](http://caniuse.com/#search=matchMedia) work perfect on all modern browsers (IE10+, firefox, chrome, android and safari).
-- With some polyfills (like the ones included in [matchMedia.js](https://github.com/paulirish/matchMedia.js/)) Breakpoints works perfect in IE6-9 as well.
-
 
 ## Copyright and license
 

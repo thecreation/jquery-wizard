@@ -1,0 +1,15 @@
+
+.step-pane {
+  display: none;
+
+  &.activing {
+    display: block;
+    opacity: 0;
+    transition: opacity .15s linear;
+  }
+
+  &.active {
+    display: block;
+    opacity: 1;
+  }
+}

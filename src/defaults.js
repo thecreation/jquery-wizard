@@ -18,17 +18,17 @@ Wizard.defaults = {
   keyNavigation: true,
   contentCache: true,
 
-  buttons: {
-    next: {
-      label: 'Next',
-    },
-    previous: {
-      label: 'Previous',
-    },
-    finish: {
-      lable: 'Finish'
-    },
-  },
+  // buttons: {
+  //   next: {
+  //     label: 'Next',
+  //   },
+  //   previous: {
+  //     label: 'Previous',
+  //   },
+  //   finish: {
+  //     lable: 'Finish'
+  //   },
+  // },
 
   hideButtonsOnDisabled: true,
 
@@ -36,6 +36,7 @@ Wizard.defaults = {
 
   onNext: null,
   onPreview: null,
+  
   onFirst: null,
   onLast: null,
 

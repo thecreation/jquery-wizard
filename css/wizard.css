@@ -1,14 +1,27 @@
 .step-pane {
-  display: none;
-}
-.step-pane.activing {
-  display: block;
+  position: absolute;
   opacity: 0;
-  -webkit-transition: opacity .15s linear;
-       -o-transition: opacity .15s linear;
-          transition: opacity .15s linear;
+  -webkit-transition: opacity .2s ease;
+       -o-transition: opacity .2s ease;
+          transition: opacity .2s ease;
 }
 .step-pane.active {
-  display: block;
+  position: relative;
   opacity: 1;
+}
+.step-pane.activing {
+  top: 0;
+}
+.step-content {
+  position: relative;
+  padding: 0;
+  -webkit-transition: height .2s ease;
+       -o-transition: height .2s ease;
+          transition: height .2s ease;
+}
+.step-pane {
+  padding: 10px;
+}
+.step-content {
+  border: 1px solid #aaa;
 }

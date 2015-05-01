@@ -8,6 +8,9 @@ $.extend(Wizard.prototype, {
       self.steps.push(new Step(this, self, index));
     });
 
+    this._current = 0;
+    this.transitioning = null;
+
     $.each(this.steps, function(i, step){
       step.setup();
     });
@@ -26,10 +29,17 @@ $.extend(Wizard.prototype, {
   },
 
   goTo: function(index) {
-    //this.current().hide();
-    this.get(index).show();
+    if(index === this._current || this.transitioning === true){
+      return;
+    }
+    this.transitioning = true;
+    var self = this;
 
-    this._current = index;
+    this.current().hide();
+    this.get(index).show(function(){
+      self._current = index;
+      self.transitioning = false;
+    });
   },
 
   length: function() {
@@ -45,11 +55,17 @@ $.extend(Wizard.prototype, {
   },
 
   next: function() {
+    if(this._current < this.length() - 1){
+      this.goTo(this._current + 1);
+    }
 
+    return false;
   },
 
   preview: function() {
-
+    if(this._current > 0) {
+      this.goTo(this._current -1);
+    }
   },
 
   first: function() {
@@ -61,7 +77,7 @@ $.extend(Wizard.prototype, {
   },
 
   reset: function() {
-
+    
   },
 
   destroy: function() {

@@ -1,0 +1,3 @@
+var WizardStandard = function() {
+	
+}

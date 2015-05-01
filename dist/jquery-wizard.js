@@ -1,4 +1,4 @@
-/*! jquery wizard - v0.1.0 - 2015-05-01
+/*! jquery wizard - v0.1.0 - 2015-05-02
  * https://github.com/amazingSurge/jquery-wizard
  * Copyright (c) 2015 amazingSurge; Licensed GPL */
 (function($, document, window, undefined) {
@@ -62,6 +62,7 @@
         return support;
     })();
 
+
     var Wizard = function(element, options) {
         this.$element = $(element);
 
@@ -72,7 +73,20 @@
         this.initialize();
     }
 
+    function emulateTransitionEnd($el, duration) {
+        var called = false;
 
+        $el.one(Support.transition.end, function() {
+            called = true;
+        });
+        var callback = function() {
+            if (!called) {
+                $el.trigger(Support.transition.end);
+            }
+        }
+        setTimeout(callback, duration);
+        return this;
+    }
     Wizard.defaults = {
         step: '.steps > li',
 
@@ -93,17 +107,17 @@
         keyNavigation: true,
         contentCache: true,
 
-        buttons: {
-            next: {
-                label: 'Next',
-            },
-            previous: {
-                label: 'Previous',
-            },
-            finish: {
-                lable: 'Finish'
-            },
-        },
+        // buttons: {
+        //   next: {
+        //     label: 'Next',
+        //   },
+        //   previous: {
+        //     label: 'Previous',
+        //   },
+        //   finish: {
+        //     lable: 'Finish'
+        //   },
+        // },
 
         hideButtonsOnDisabled: true,
 
@@ -111,6 +125,7 @@
 
         onNext: null,
         onPreview: null,
+
         onFirst: null,
         onLast: null,
 
@@ -135,6 +150,7 @@
     };
 
     $.extend(Step.prototype, {
+        TRANSITION_DURATION: 200,
         initialize: function(element, wizard, index) {
             this.$element = $(element);
             this.wizard = wizard;
@@ -155,11 +171,24 @@
         },
 
         setup: function() {
+            if (this.index === this.wizard.currentIndex()) {
+                this.isOpen = true;
+            }
+
             this.$element.attr('aria-expanded', this.isOpen);
             this.$panel.attr('aria-expanded', this.isOpen);
+
+            var classes = this.wizard.options.classes;
+            if (this.isOpen) {
+                this.$element.addClass(classes.step.active);
+                this.$panel.addClass(classes.step.active);
+            } else {
+                this.$element.removeClass(classes.step.active);
+                this.$panel.removeClass(classes.step.active);
+            }
         },
 
-        show: function() {
+        show: function(callback) {
             if (this.transitioning || this.isOpen) {
                 return;
             }
@@ -170,26 +199,32 @@
                 .addClass(classes.step.active)
                 .attr('aria-expanded', true);
 
+            this.$panel
+                .addClass(classes.panel.activing)
+                .addClass(classes.panel.active)
+                .attr('aria-expanded', true);
+
             this.transitioning = 1;
 
             var complete = function() {
                 this.$panel
                     .removeClass(classes.panel.activing)
-                    .addClass(classes.panel.active);
 
                 this.transitioning = 0;
+                this.isOpen = true;
+
+                if ($.isFunction(callback)) {
+                    callback();
+                }
             }
-
-            this.$panel.one(Support.transition.end, $.proxy(complete, this));
-
-            this.$panel
-                .addClass(classes.panel.activing)
-                .attr('aria-expanded', true);
 
             if (!Support.transition) {
                 return complete.call(this);
             }
 
+            this.$panel.one(Support.transition.end, $.proxy(complete, this));
+
+            emulateTransitionEnd(this.$panel, this.TRANSITION_DURATION);
         },
 
         hide: function() {
@@ -197,29 +232,38 @@
                 return;
             }
 
+            var classes = this.wizard.options.classes;
+
             this.$element
                 .removeClass(classes.step.active)
                 .attr('aria-expanded', false);
 
+            this.$panel
+                .addClass(classes.panel.activing)
+                .removeClass(classes.panel.active)
+                .attr('aria-expanded', false);
+
             this.transitioning = 1;
 
-            var complete = function() {
+            var complete = function(callback) {
                 this.$panel
-                    .removeClass(classes.panel.active)
                     .removeClass(classes.panel.activing);
 
                 this.transitioning = 0;
+                this.isOpen = false;
+
+                if ($.isFunction(callback)) {
+                    callback();
+                }
             }
-
-            this.$panel.one(Support.transition.end, $.proxy(complete, this));
-
-            this.$panel
-                .addClass(classes.panel.activing)
-                .attr('aria-expanded', false);
 
             if (!Support.transition) {
                 return complete.call(this);
             }
+
+            this.$panel.one(Support.transition.end, $.proxy(complete, this));
+
+            emulateTransitionEnd(this.$panel, this.TRANSITION_DURATION);
         },
 
         load: function() {
@@ -227,11 +271,13 @@
         },
 
         enable: function() {
-
+            var classes = this.wizard.classes;
+            this.$element.removeClass(classes.step.disabled);
         },
 
         disable: function() {
-
+            var classes = this.wizard.classes;
+            this.$element.addClass(classes.step.disabled);
         },
 
         validate: function() {
@@ -253,6 +299,9 @@
                 self.steps.push(new Step(this, self, index));
             });
 
+            this._current = 0;
+            this.transitioning = null;
+
             $.each(this.steps, function(i, step) {
                 step.setup();
             });
@@ -271,10 +320,17 @@
         },
 
         goTo: function(index) {
-            //this.current().hide();
-            this.get(index).show();
+            if (index === this._current || this.transitioning === true) {
+                return;
+            }
+            this.transitioning = true;
+            var self = this;
 
-            this._current = index;
+            this.current().hide();
+            this.get(index).show(function() {
+                self._current = index;
+                self.transitioning = false;
+            });
         },
 
         length: function() {
@@ -290,11 +346,17 @@
         },
 
         next: function() {
+            if (this._current < this.length() - 1) {
+                this.goTo(this._current + 1);
+            }
 
+            return false;
         },
 
         preview: function() {
-
+            if (this._current > 0) {
+                this.goTo(this._current - 1);
+            }
         },
 
         first: function() {

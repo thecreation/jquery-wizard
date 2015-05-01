@@ -1,15 +1,32 @@
 
-.step-pane {
-  display: none;
+@transition-duration: .2s;
 
-  &.activing {
-    display: block;
-    opacity: 0;
-    transition: opacity .15s linear;
-  }
+.step-pane  {
+  position: absolute;
+  opacity: 0;
+
+  transition: opacity @transition-duration ease;
 
   &.active {
-    display: block;
+    position: relative;
     opacity: 1;
   }
+
+  &.activing {
+    top: 0;
+  }
+}
+
+.step-content {
+  position: relative;
+  padding: 0;
+  transition: height @transition-duration ease;
+}
+
+// styles
+.step-pane {
+  padding: 10px;
+}
+.step-content {
+  border: 1px solid #aaa;
 }

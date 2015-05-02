@@ -50,8 +50,11 @@
 (function(){
     var wizard = $('.wizard').wizard({
       step: '.steps > li'
-    });
+    }).data('wizard');
 
+    wizard.get(0).on('leaveActive', function(){
+      console.info('leave');
+    });
 
 })();
 </script>

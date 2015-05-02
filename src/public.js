@@ -67,8 +67,10 @@ $.extend(Wizard.prototype, {
     });
   },
 
-  trigger: function(){
+  trigger: function(event, index){
+    var method_arguments = Array.prototype.slice.call(arguments, 1);
 
+    this.$element.trigger(event);
   },
 
   length: function() {

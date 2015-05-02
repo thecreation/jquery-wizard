@@ -165,15 +165,36 @@ $.extend(Step.prototype, {
 
   on: function(event, handler){
     if($.isFunction(handler)){
-      this.events[event] = handler;
+      if($.isArray(this.events[event])){
+        this.events[event].push(handler);
+      } else {
+        this.events[event] = [handler];
+      }
     }
+
+    return this;
+  },
+
+  off: function(event, handler){
+    if($.isFunction(handler) && $.isArray(this.events[event])){
+      $.each(this.events[event], function(i, f){
+        if(f === handler) {
+          delete this.events[event][i];
+          return false;
+        }
+      });
+    }
+
+    return this;
   },
 
   trigger: function(event) {
     var method_arguments = Array.prototype.slice.call(arguments, 1);
 
-    if($.isFunction(this.events[event])){
-      this.events[event].apply(this, method_arguments);
+    if($.isArray(this.events[event])){
+      for(var i in this.events[event]){
+        this.events[event][i].apply(this, method_arguments);
+      }
     }
     this.wizard.trigger(event, this.index, method_arguments);
   },

@@ -1,5 +1,7 @@
 .step-pane {
   position: absolute;
+  top: 0;
+  visibility: hidden;
   opacity: 0;
   -webkit-transition: opacity .2s ease;
        -o-transition: opacity .2s ease;
@@ -7,10 +9,11 @@
 }
 .step-pane.active {
   position: relative;
+  visibility: visible;
   opacity: 1;
 }
 .step-pane.activing {
-  top: 0;
+  visibility: visible;
 }
 .step-content {
   position: relative;

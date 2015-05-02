@@ -87,6 +87,11 @@
         setTimeout(callback, duration);
         return this;
     }
+
+    function capitalizeFirst(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
     Wizard.defaults = {
         step: '.steps > li',
 
@@ -95,7 +100,8 @@
                 done: 'done',
                 error: 'error',
                 active: 'active',
-                disabled: 'disabled'
+                disabled: 'disabled',
+                activing: 'activing'
             },
 
             panel: {
@@ -104,7 +110,10 @@
             }
         },
 
-        keyNavigation: true,
+        onStateChange: null,
+
+        autoFocus: true,
+        keyboard: true,
         contentCache: true,
 
         // buttons: {
@@ -119,18 +128,24 @@
         //   },
         // },
 
-        hideButtonsOnDisabled: true,
+        validator: function(index) {
+            return true;
+        },
 
         onReset: null,
 
         onNext: null,
-        onPreview: null,
+        onprev: null,
 
         onFirst: null,
         onLast: null,
 
+
+
         onShow: null,
         onHide: null,
+        onLoad: null,
+        onLoaded: null,
 
         onInit: null,
         onDestroy: null,
@@ -155,9 +170,18 @@
             this.$element = $(element);
             this.wizard = wizard;
 
-            this.isOpen = false;
-            this.transitioning = null;
+            this.events = {};
+
+            this.states = {
+                done: false,
+                error: false,
+                active: false,
+                disabled: false,
+                activing: false
+            };
+
             this.index = index;
+
             this.$element.data('wizard-index', index);
 
             var selector = this.$element.data('target');
@@ -172,31 +196,30 @@
 
         setup: function() {
             if (this.index === this.wizard.currentIndex()) {
-                this.isOpen = true;
+                this.enter('active');
             }
 
-            this.$element.attr('aria-expanded', this.isOpen);
-            this.$panel.attr('aria-expanded', this.isOpen);
+            this.$element.attr('aria-expanded', this.is('active'));
+            this.$panel.attr('aria-expanded', this.is('active'));
 
             var classes = this.wizard.options.classes;
-            if (this.isOpen) {
-                this.$element.addClass(classes.step.active);
+            if (this.is('active')) {
                 this.$panel.addClass(classes.step.active);
             } else {
-                this.$element.removeClass(classes.step.active);
                 this.$panel.removeClass(classes.step.active);
             }
         },
 
         show: function(callback) {
-            if (this.transitioning || this.isOpen) {
+            if (this.is('activing') || this.is('active')) {
                 return;
             }
+
+            this.enter('activing');
 
             var classes = this.wizard.options.classes;
 
             this.$element
-                .addClass(classes.step.active)
                 .attr('aria-expanded', true);
 
             this.$panel
@@ -204,17 +227,15 @@
                 .addClass(classes.panel.active)
                 .attr('aria-expanded', true);
 
-            this.transitioning = 1;
-
             var complete = function() {
                 this.$panel
                     .removeClass(classes.panel.activing)
 
-                this.transitioning = 0;
-                this.isOpen = true;
+                this.leave('activing');
+                this.enter('active')
 
                 if ($.isFunction(callback)) {
-                    callback();
+                    callback.call(this);
                 }
             }
 
@@ -228,14 +249,15 @@
         },
 
         hide: function() {
-            if (this.transitioning || !this.isOpen) {
+            if (this.is('activing') || !this.is('active')) {
                 return;
             }
+
+            this.enter('activing');
 
             var classes = this.wizard.options.classes;
 
             this.$element
-                .removeClass(classes.step.active)
                 .attr('aria-expanded', false);
 
             this.$panel
@@ -243,17 +265,15 @@
                 .removeClass(classes.panel.active)
                 .attr('aria-expanded', false);
 
-            this.transitioning = 1;
-
             var complete = function(callback) {
                 this.$panel
                     .removeClass(classes.panel.activing);
 
-                this.transitioning = 0;
-                this.isOpen = false;
+                this.leave('activing');
+                this.leave('active');
 
                 if ($.isFunction(callback)) {
-                    callback();
+                    callback.call(this);
                 }
             }
 
@@ -266,26 +286,96 @@
             emulateTransitionEnd(this.$panel, this.TRANSITION_DURATION);
         },
 
-        load: function() {
-
+        empty: function() {
+            this.$panel.empty();
         },
 
-        enable: function() {
-            var classes = this.wizard.classes;
-            this.$element.removeClass(classes.step.disabled);
+        showLoading: function() {
+            var self = this;
         },
 
-        disable: function() {
-            var classes = this.wizard.classes;
-            this.$element.addClass(classes.step.disabled);
+        hideLoading: function() {
+            var self = this;
+        },
+
+        load: function(object) {
+            var options = object.options;
+            var self = this;
+
+            function setContent(content) {
+                self.$panel.html(content);
+                self.hideLoading();
+
+                self.trigger(self, 'afterLoad', object);
+            }
+
+            if (object.content) {
+                setContent(object.content);
+            } else if (object.url) {
+                this.showLoading();
+
+                $.ajax(object.url, object.settings || {}).done(function(data) {
+                    setContent(data);
+                }).fail(function() {
+
+                });
+            } else {
+                setContent('');
+            }
+        },
+
+        on: function(event, handler) {
+            if ($.isFunction(handler)) {
+                this.events[event] = handler;
+            }
+        },
+
+        trigger: function(event) {
+            var method_arguments = Array.prototype.slice.call(arguments, 1);
+
+            if ($.isFunction(this.events[event])) {
+                this.events[event].apply(this, method_arguments);
+            }
+            this.wizard.trigger(event, this.index, method_arguments);
+        },
+
+        /**
+         * Checks whether the carousel is in a specific state or not.
+         */
+        is: function(state) {
+            return this.states[state] && this.states[state] === true;
+        },
+
+        /**
+         * Enters a state.
+         */
+        enter: function(state) {
+            this.states[state] = true;
+
+            var classes = this.wizard.options.classes;
+            this.$element.addClass(classes.step[state]);
+
+            this.trigger('enter' + capitalizeFirst(state));
+        },
+
+        /**
+         * Leaves a state.
+         */
+        leave: function(state) {
+            this.states[state] = false;
+
+            var classes = this.wizard.options.classes;
+            this.$element.removeClass(classes.step[state]);
+
+            this.trigger('leave' + capitalizeFirst(state));
         },
 
         validate: function() {
-
+            //return this.wizard.validate(this.index);
         },
 
         getPanel: function() {
-
+            return this.$panel;
         }
     });
 
@@ -310,6 +400,26 @@
                 var index = $(this).data('wizard-index');
                 self.goTo(index);
             });
+
+            if (this.options.keyboard) {
+                $(document).on('keyup', $.proxy(this._keydown, this));
+            }
+        },
+
+        _keydown: function(e) {
+            if (/input|textarea/i.test(e.target.tagName)) return;
+            switch (e.which) {
+                case 37:
+                    this.prev();
+                    break;
+                case 39:
+                    this.next();
+                    break;
+                default:
+                    return;
+            }
+
+            e.preventDefault();
         },
 
         get: function(index) {
@@ -323,6 +433,7 @@
             if (index === this._current || this.transitioning === true) {
                 return;
             }
+
             this.transitioning = true;
             var self = this;
 
@@ -330,7 +441,20 @@
             this.get(index).show(function() {
                 self._current = index;
                 self.transitioning = false;
+
+                if (self.options.autoFocus) {
+                    var $input = this.$panel.find(':input');
+                    if ($input.length > 0) {
+                        $input.eq(0).focus();
+                    } else {
+                        this.$panel.focus();
+                    }
+                }
             });
+        },
+
+        trigger: function() {
+
         },
 
         length: function() {
@@ -353,7 +477,7 @@
             return false;
         },
 
-        preview: function() {
+        prev: function() {
             if (this._current > 0) {
                 this.goTo(this._current - 1);
             }

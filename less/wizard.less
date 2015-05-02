@@ -4,16 +4,19 @@
 .step-pane  {
   position: absolute;
   opacity: 0;
+  top: 0;
+  visibility: hidden;
 
   transition: opacity @transition-duration ease;
 
   &.active {
     position: relative;
+    visibility: visible;
     opacity: 1;
   }
 
   &.activing {
-    top: 0;
+    visibility: visible;
   }
 }
 

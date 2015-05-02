@@ -6,7 +6,8 @@ Wizard.defaults = {
       done: 'done',
       error: 'error',
       active: 'active',
-      disabled: 'disabled'
+      disabled: 'disabled',
+      activing: 'activing'
     },
 
     panel: {
@@ -15,7 +16,10 @@ Wizard.defaults = {
     }
   },
 
-  keyNavigation: true,
+  onStateChange: null,
+
+  autoFocus: true,
+  keyboard: true,
   contentCache: true,
 
   // buttons: {
@@ -30,18 +34,24 @@ Wizard.defaults = {
   //   },
   // },
 
-  hideButtonsOnDisabled: true,
+  validator: function(index){
+    return true;
+  },
 
   onReset: null,
 
   onNext: null,
-  onPreview: null,
-  
+  onprev: null,
+
   onFirst: null,
   onLast: null,
 
+
+
   onShow: null,
   onHide: null,
+  onLoad: null,
+  onLoaded: null,
 
   onInit: null,
   onDestroy: null,

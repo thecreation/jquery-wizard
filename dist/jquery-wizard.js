@@ -1,4 +1,4 @@
-/*! jquery wizard - v0.1.0 - 2015-05-02
+/*! jquery wizard - v0.1.0 - 2015-05-03
  * https://github.com/amazingSurge/jquery-wizard
  * Copyright (c) 2015 amazingSurge; Licensed GPL */
 (function($, document, window, undefined) {
@@ -101,35 +101,36 @@
                 error: 'error',
                 active: 'active',
                 disabled: 'disabled',
-                activing: 'activing'
+                activing: 'activing',
+                loading: 'loading'
             },
 
             panel: {
                 active: 'active',
-                activing: 'activing'
+                activing: 'activing',
             }
         },
-
-        onStateChange: null,
 
         autoFocus: true,
         keyboard: true,
         contentCache: true,
 
         // buttons: {
-        //   next: {
-        //     label: 'Next',
-        //   },
-        //   previous: {
-        //     label: 'Previous',
-        //   },
-        //   finish: {
-        //     lable: 'Finish'
-        //   },
+        //     next: {
+        //         label: 'Next',
+        //     },
+        //     previous: {
+        //         label: 'Previous',
+        //     },
+        //     finish: {
+        //         lable: 'Finish'
+        //     },
         // },
 
-        validator: function(index) {
-            return true;
+        loading: {
+            show: function(step) {},
+            hide: function(step) {},
+            fail: function(step) {},
         },
 
         onReset: null,
@@ -139,8 +140,6 @@
 
         onFirst: null,
         onLast: null,
-
-
 
         onShow: null,
         onHide: null,
@@ -171,6 +170,9 @@
             this.wizard = wizard;
 
             this.events = {};
+            this.validator = function() {
+                return true;
+            };
 
             this.states = {
                 done: false,
@@ -290,34 +292,29 @@
             this.$panel.empty();
         },
 
-        showLoading: function() {
-            var self = this;
-        },
-
-        hideLoading: function() {
-            var self = this;
-        },
-
         load: function(object) {
             var options = object.options;
             var self = this;
 
+            this.enter('loading');
+
             function setContent(content) {
                 self.$panel.html(content);
-                self.hideLoading();
 
-                self.trigger(self, 'afterLoad', object);
+                self.wizard.options.loading.hide.call(self.wizard, self);
+
+                self.leave('loading');
             }
 
             if (object.content) {
                 setContent(object.content);
             } else if (object.url) {
-                this.showLoading();
+                self.wizard.options.loading.show.call(self.wizard, self);
 
                 $.ajax(object.url, object.settings || {}).done(function(data) {
                     setContent(data);
                 }).fail(function() {
-
+                    self.wizard.options.loading.fail.call(self.wizard, self);
                 });
             } else {
                 setContent('');
@@ -383,23 +380,41 @@
          * Leaves a state.
          */
         leave: function(state) {
-            this.states[state] = false;
+            if (this.states[state]) {
+                this.states[state] = false;
 
-            var classes = this.wizard.options.classes;
-            this.$element.removeClass(classes.step[state]);
+                var classes = this.wizard.options.classes;
+                this.$element.removeClass(classes.step[state]);
 
-            this.trigger('leave' + capitalizeFirst(state));
+                this.trigger('leave' + capitalizeFirst(state));
+            }
+        },
+
+        reset: function() {
+            for (var state in this.states) {
+                this.leave(state);
+            }
+            this.setup();
+
+            return this;
+        },
+
+        setValidator: function(validator) {
+            if ($.isFunction(validator)) {
+                this.validator = validator;
+            }
+
+            return this;
         },
 
         validate: function() {
-            //return this.wizard.validate(this.index);
+            return this.validator.call(this.$panel.get(0), this);
         },
 
         getPanel: function() {
             return this.$panel;
         }
     });
-
     $.extend(Wizard.prototype, {
         Constructor: Wizard,
         initialize: function() {
@@ -455,10 +470,25 @@
                 return;
             }
 
+            var current = this.current();
+
+            if (!current.validate()) {
+                current.leave('done');
+                current.enter('error');
+
+                return false;
+            } else {
+                current.leave('error');
+
+                if (index > this._current) {
+                    current.enter('done');
+                }
+            }
+
             this.transitioning = true;
             var self = this;
 
-            this.current().hide();
+            current.hide();
             this.get(index).show(function() {
                 self._current = index;
                 self.transitioning = false;
@@ -515,11 +545,11 @@
         },
 
         reset: function() {
+            this._current = 0;
 
-        },
-
-        destroy: function() {
-
+            $.each(this.steps, function(i, step) {
+                step.reset();
+            });
         }
     });
 
@@ -552,7 +582,6 @@
         }
     };
 
-
     $(document).on('click', '[data-wizard]', function(e) {
         var href;
         var $this = $(this);
@@ -564,15 +593,10 @@
             return;
         }
 
-        var action = $this.data('wizard');
+        var method = $this.data('wizard');
 
-        switch (action) {
-            case 'prev':
-                wizard.prev();
-                break;
-            case 'next':
-                wizard.next();
-                break;
+        if (/^(prev|next|first|finish|reset)$/.test(method)) {
+            wizard[method]();
         }
 
         e.preventDefault();

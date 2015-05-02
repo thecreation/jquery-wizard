@@ -1,13 +1,13 @@
 function emulateTransitionEnd($el, duration) {
-	var called = false;
+    var called = false;
 
     $el.one(Support.transition.end, function () {
-    	called = true;
+        called = true;
     });
     var callback = function () {
-    	if (!called) {
-    		$el.trigger( Support.transition.end );
-    	}
+        if (!called) {
+            $el.trigger( Support.transition.end );
+        }
     }
     setTimeout(callback, duration);
     return this;

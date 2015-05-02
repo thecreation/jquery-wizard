@@ -1,66 +1,65 @@
 Wizard.defaults = {
-  step: '.steps > li',
+    step: '.steps > li',
 
-  classes: {
-    step: {
-      done: 'done',
-      error: 'error',
-      active: 'active',
-      disabled: 'disabled',
-      activing: 'activing'
+    classes: {
+        step: {
+            done: 'done',
+            error: 'error',
+            active: 'active',
+            disabled: 'disabled',
+            activing: 'activing',
+            loading: 'loading'
+        },
+
+        panel: {
+            active: 'active',
+            activing: 'activing',
+        }
     },
 
-    panel: {
-      active: 'active',
-      activing: 'activing'
-    }
-  },
+    autoFocus: true,
+    keyboard: true,
+    contentCache: true,
 
-  onStateChange: null,
+    // buttons: {
+    //     next: {
+    //         label: 'Next',
+    //     },
+    //     previous: {
+    //         label: 'Previous',
+    //     },
+    //     finish: {
+    //         lable: 'Finish'
+    //     },
+    // },
 
-  autoFocus: true,
-  keyboard: true,
-  contentCache: true,
+    loading: {
+        show: function(step) {},
+        hide: function(step) {},
+        fail: function(step) {},
+    },
 
-  // buttons: {
-  //   next: {
-  //     label: 'Next',
-  //   },
-  //   previous: {
-  //     label: 'Previous',
-  //   },
-  //   finish: {
-  //     lable: 'Finish'
-  //   },
-  // },
+    onReset: null,
 
-  validator: function(index){
-    return true;
-  },
+    onNext: null,
+    onprev: null,
 
-  onReset: null,
+    onFirst: null,
+    onLast: null,
 
-  onNext: null,
-  onprev: null,
+    onShow: null,
+    onHide: null,
+    onLoad: null,
+    onLoaded: null,
 
-  onFirst: null,
-  onLast: null,
+    onInit: null,
+    onDestroy: null,
 
+    onChanging: null,
+    onChanged: null,
 
+    onFinishing: null,
+    onFinished: null,
 
-  onShow: null,
-  onHide: null,
-  onLoad: null,
-  onLoaded: null,
-
-  onInit: null,
-  onDestroy: null,
-
-  onChanging: null,
-  onChanged: null,
-
-  onFinishing: null,
-  onFinished: null,
-
-  onContentLoaded: null,
+    onContentLoaded: null,
 };

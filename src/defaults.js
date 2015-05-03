@@ -1,5 +1,11 @@
 Wizard.defaults = {
     step: '.steps > li',
+    buttonsAppendTo: '',
+    templates: {
+        button: function(action, label){
+            return '<li class="'+action+'"><a href="'+this.id+'" data-wizard="'+action+'" role="button">'+label+'</a></li>';
+        }
+    },
 
     classes: {
         step: {
@@ -13,25 +19,25 @@ Wizard.defaults = {
 
         panel: {
             active: 'active',
-            activing: 'activing',
+            activing: 'activing'
+        },
+
+        buttons: {
+            disabled: '',
+            prev: '',
+            next: '',
+            finish: ''
         }
     },
 
     autoFocus: true,
     keyboard: true,
-    contentCache: true,
 
-    // buttons: {
-    //     next: {
-    //         label: 'Next',
-    //     },
-    //     previous: {
-    //         label: 'Previous',
-    //     },
-    //     finish: {
-    //         lable: 'Finish'
-    //     },
-    // },
+    buttonLabels: {
+        next: 'Next',
+        previous:'Previous',
+        finish: 'Finish'
+    },
 
     loading: {
         show: function(step) {},

@@ -90,7 +90,7 @@ $.extend(Step.prototype, {
         emulateTransitionEnd(this.$panel, this.TRANSITION_DURATION);
     },
 
-    hide: function() {
+    hide: function(callback) {
         if(this.is('activing') || !this.is('active')) {
             return;
         }
@@ -107,7 +107,7 @@ $.extend(Step.prototype, {
             .removeClass(classes.panel.active)
             .attr('aria-expanded', false);
 
-        var complete = function (callback) {
+        var complete = function () {
             this.$panel
                 .removeClass(classes.panel.activing);
 

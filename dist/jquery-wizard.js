@@ -94,6 +94,12 @@
 
     Wizard.defaults = {
         step: '.steps > li',
+        buttonsAppendTo: '',
+        templates: {
+            button: function(action, label) {
+                return '<li class="' + action + '"><a href="' + this.id + '" data-wizard="' + action + '" role="button">' + label + '</a></li>';
+            }
+        },
 
         classes: {
             step: {
@@ -107,25 +113,25 @@
 
             panel: {
                 active: 'active',
-                activing: 'activing',
+                activing: 'activing'
+            },
+
+            buttons: {
+                disabled: '',
+                prev: '',
+                next: '',
+                finish: ''
             }
         },
 
         autoFocus: true,
         keyboard: true,
-        contentCache: true,
 
-        // buttons: {
-        //     next: {
-        //         label: 'Next',
-        //     },
-        //     previous: {
-        //         label: 'Previous',
-        //     },
-        //     finish: {
-        //         lable: 'Finish'
-        //     },
-        // },
+        buttonLabels: {
+            next: 'Next',
+            previous: 'Previous',
+            finish: 'Finish'
+        },
 
         loading: {
             show: function(step) {},
@@ -250,7 +256,7 @@
             emulateTransitionEnd(this.$panel, this.TRANSITION_DURATION);
         },
 
-        hide: function() {
+        hide: function(callback) {
             if (this.is('activing') || !this.is('active')) {
                 return;
             }
@@ -267,7 +273,7 @@
                 .removeClass(classes.panel.active)
                 .attr('aria-expanded', false);
 
-            var complete = function(callback) {
+            var complete = function() {
                 this.$panel
                     .removeClass(classes.panel.activing);
 
@@ -415,6 +421,7 @@
             return this.$panel;
         }
     });
+
     $.extend(Wizard.prototype, {
         Constructor: Wizard,
         initialize: function() {
@@ -553,6 +560,26 @@
         }
     });
 
+    $(document).on('click', '[data-wizard]', function(e) {
+        var href;
+        var $this = $(this);
+        var $target = $($this.attr('data-target') || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, ''));
+
+        var wizard = $target.data('wizard');
+
+        if (!wizard) {
+            return;
+        }
+
+        var method = $this.data('wizard');
+
+        if (/^(prev|next|first|finish|reset)$/.test(method)) {
+            wizard[method]();
+        }
+
+        e.preventDefault();
+    });
+
     $.fn.wizard = function(options) {
         if (typeof options === 'string') {
             var method = options;
@@ -581,24 +608,4 @@
             });
         }
     };
-
-    $(document).on('click', '[data-wizard]', function(e) {
-        var href;
-        var $this = $(this);
-        var $target = $($this.attr('data-target') || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, ''));
-
-        var wizard = $target.data('wizard');
-
-        if (!wizard) {
-            return;
-        }
-
-        var method = $this.data('wizard');
-
-        if (/^(prev|next|first|finish|reset)$/.test(method)) {
-            wizard[method]();
-        }
-
-        e.preventDefault();
-    });
 })(jQuery, document, window);

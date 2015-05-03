@@ -30,6 +30,7 @@ module.exports = function(grunt) {
                     'src/defaults.js',
                     'src/step.js',
                     'src/public.js',
+                    'src/bind.js',
                     'src/outro.js'
                 ],
                 dest: 'dist/jquery-wizard.js'

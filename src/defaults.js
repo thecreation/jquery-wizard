@@ -64,7 +64,7 @@ Wizard.defaults = {
     loading: {
         show: function(step) {},
         hide: function(step) {},
-        fail: function(step) {},
+        fail: function(step) {}
     },
 
     cacheContent: false,

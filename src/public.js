@@ -96,6 +96,23 @@ $.extend(Wizard.prototype, {
         e.preventDefault();
     },
 
+    trigger: function(eventType){
+        var method_arguments = Array.prototype.slice.call(arguments, 1);
+        var data = [this].concat(method_arguments);
+
+        this.$element.trigger('wizard::' + eventType, data);
+
+        // callback
+        eventType = eventType.replace(/\b\w+\b/g, function(word) {
+            return word.substring(0, 1).toUpperCase() + word.substring(1);
+        });
+
+        var onFunction = 'on' + eventType;
+        if (typeof this.options[onFunction] === 'function') {
+            this.options[onFunction].apply(this, method_arguments);
+        }
+    },
+
     get: function(index) {
         if(typeof index === 'string' && index.substring(0, 1) === '#'){
             var id = index.substring(1);
@@ -134,8 +151,7 @@ $.extend(Wizard.prototype, {
                     current.enter('done');
                 }
             }
-        }
-        
+        }     
 
         var self = this;
         var process = function (){
@@ -177,24 +193,6 @@ $.extend(Wizard.prototype, {
         }
 
         return true;
-    },
-
-    trigger: function(eventType){
-
-        var method_arguments = Array.prototype.slice.call(arguments, 1);
-        var data = [this].concat(method_arguments);
-
-        this.$element.trigger('wizard::' + eventType, data);
-
-        // callback
-        eventType = eventType.replace(/\b\w+\b/g, function(word) {
-            return word.substring(0, 1).toUpperCase() + word.substring(1);
-        });
-
-        var onFunction = 'on' + eventType;
-        if (typeof this.options[onFunction] === 'function') {
-            this.options[onFunction].apply(this, method_arguments);
-        }
     },
 
     length: function() {

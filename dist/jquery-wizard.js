@@ -93,7 +93,6 @@
             }
         }
         setTimeout(callback, duration);
-        return this;
     }
     Wizard.defaults = {
         step: '.wizard-steps > li',
@@ -159,14 +158,14 @@
         },
 
         loading: {
-            show: function(step) {},
-            hide: function(step) {},
-            fail: function(step) {},
+            show: function() {},
+            hide: function() {},
+            fail: function() {}
         },
 
         cacheContent: false,
 
-        validator: function(step) {
+        validator: function() {
             return true;
         },
 
@@ -191,7 +190,7 @@
     // Step
     function Step() {
         return this.initialize.apply(this, Array.prototype.slice.call(arguments));
-    };
+    }
 
     $.extend(Step.prototype, {
         TRANSITION_DURATION: 200,
@@ -355,7 +354,7 @@
                 self.trigger('afterLoad');
 
                 if ($.isFunction(callback)) {
-                    callback.call(this);
+                    callback.call(self);
                 }
             }
 
@@ -374,31 +373,6 @@
             } else {
                 setContent('');
             }
-        },
-
-        on: function(event, handler) {
-            if ($.isFunction(handler)) {
-                if ($.isArray(this.events[event])) {
-                    this.events[event].push(handler);
-                } else {
-                    this.events[event] = [handler];
-                }
-            }
-
-            return this;
-        },
-
-        off: function(event, handler) {
-            if ($.isFunction(handler) && $.isArray(this.events[event])) {
-                $.each(this.events[event], function(i, f) {
-                    if (f === handler) {
-                        delete this.events[event][i];
-                        return false;
-                    }
-                });
-            }
-
-            return this;
         },
 
         trigger: function(event) {
@@ -459,6 +433,31 @@
          */
         active: function() {
             return this.wizard.goTo(this.index);
+        },
+
+        on: function(event, handler) {
+            if ($.isFunction(handler)) {
+                if ($.isArray(this.events[event])) {
+                    this.events[event].push(handler);
+                } else {
+                    this.events[event] = [handler];
+                }
+            }
+
+            return this;
+        },
+
+        off: function(event, handler) {
+            if ($.isFunction(handler) && $.isArray(this.events[event])) {
+                $.each(this.events[event], function(i, f) {
+                    if (f === handler) {
+                        delete this.events[event][i];
+                        return false;
+                    }
+                });
+            }
+
+            return this;
         },
 
         is: function(state) {
@@ -600,6 +599,23 @@
             e.preventDefault();
         },
 
+        trigger: function(eventType) {
+            var method_arguments = Array.prototype.slice.call(arguments, 1);
+            var data = [this].concat(method_arguments);
+
+            this.$element.trigger('wizard::' + eventType, data);
+
+            // callback
+            eventType = eventType.replace(/\b\w+\b/g, function(word) {
+                return word.substring(0, 1).toUpperCase() + word.substring(1);
+            });
+
+            var onFunction = 'on' + eventType;
+            if (typeof this.options[onFunction] === 'function') {
+                this.options[onFunction].apply(this, method_arguments);
+            }
+        },
+
         get: function(index) {
             if (typeof index === 'string' && index.substring(0, 1) === '#') {
                 var id = index.substring(1);
@@ -639,7 +655,6 @@
                     }
                 }
             }
-
 
             var self = this;
             var process = function() {
@@ -681,24 +696,6 @@
             }
 
             return true;
-        },
-
-        trigger: function(eventType) {
-
-            var method_arguments = Array.prototype.slice.call(arguments, 1);
-            var data = [this].concat(method_arguments);
-
-            this.$element.trigger('wizard::' + eventType, data);
-
-            // callback
-            eventType = eventType.replace(/\b\w+\b/g, function(word) {
-                return word.substring(0, 1).toUpperCase() + word.substring(1);
-            });
-
-            var onFunction = 'on' + eventType;
-            if (typeof this.options[onFunction] === 'function') {
-                this.options[onFunction].apply(this, method_arguments);
-            }
         },
 
         length: function() {

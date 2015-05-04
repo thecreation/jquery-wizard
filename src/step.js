@@ -1,7 +1,7 @@
 // Step
 function Step() {
     return this.initialize.apply(this, Array.prototype.slice.call(arguments));
-};
+}
 
 $.extend(Step.prototype, {
     TRANSITION_DURATION: 200,
@@ -14,7 +14,7 @@ $.extend(Step.prototype, {
         this.loaded = false;
 
         this.validator = this.wizard.options.validator;
-        
+
         this.states = {
             done: false,
             error: false,
@@ -165,7 +165,7 @@ $.extend(Step.prototype, {
             self.trigger('afterLoad');
 
             if($.isFunction(callback)){
-                callback.call(this);
+                callback.call(self);
             }
         }
 
@@ -184,31 +184,6 @@ $.extend(Step.prototype, {
         } else {
             setContent('');
         }
-    },
-
-    on: function(event, handler){
-        if($.isFunction(handler)){
-            if($.isArray(this.events[event])){
-                this.events[event].push(handler);
-            } else {
-                this.events[event] = [handler];
-            }
-        }
-
-        return this;
-    },
-
-    off: function(event, handler){
-        if($.isFunction(handler) && $.isArray(this.events[event])){
-            $.each(this.events[event], function(i, f){
-                if(f === handler) {
-                    delete this.events[event][i];
-                    return false;
-                }
-            });
-        }
-
-        return this;
     },
 
     trigger: function(event) {
@@ -269,6 +244,31 @@ $.extend(Step.prototype, {
      */
     active: function(){
         return this.wizard.goTo(this.index);
+    },
+
+    on: function(event, handler){
+        if($.isFunction(handler)){
+            if($.isArray(this.events[event])){
+                this.events[event].push(handler);
+            } else {
+                this.events[event] = [handler];
+            }
+        }
+
+        return this;
+    },
+
+    off: function(event, handler){
+        if($.isFunction(handler) && $.isArray(this.events[event])){
+            $.each(this.events[event], function(i, f){
+                if(f === handler) {
+                    delete this.events[event][i];
+                    return false;
+                }
+            });
+        }
+
+        return this;
     },
 
     is: function(state) {

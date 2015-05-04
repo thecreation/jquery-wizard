@@ -10,5 +10,4 @@ function emulateTransitionEnd($el, duration) {
         }
     }
     setTimeout(callback, duration);
-    return this;
 }

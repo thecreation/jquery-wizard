@@ -32,9 +32,53 @@
 }
 
 // styles
+.done {
+    color: green !important;
+}
+.current {
+    color: blue !important;
+}
+.error {
+    color: red !important;
+}
+.disabled {
+    cursor: not-allowed !important;
+}
+
 .wizard-pane {
   padding: 10px;
 }
 .wizard-content {
   border: 1px solid #aaa;
+}
+
+.wizard-steps {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+
+  > li {
+    display: inline-block;
+    padding: 5px 10px;
+    cursor: pointer;
+    color: #666;
+
+    &:hover {
+      color: #333;
+    }
+  }
+}
+.wizard-buttons {
+  margin-top: 10px;
+  > a {
+    margin-right: 5px;
+    padding: 5px 10px;
+    border: 1px solid #aaa;
+    border-radius: 20px;
+
+    &.disabled {
+      color: #aaa;
+      border-color: #aaa;
+    }
+  }
 }

@@ -70,11 +70,18 @@ $.extend(Wizard.prototype, {
 
     updateSteps: function(){
         var self = this;
+
+
         $.each(this.steps, function(i, step){
+            
             if(i > self._current){
                 step.leave('error');
                 step.leave('active');
                 step.leave('done');
+
+                if(!self.options.enableWhenVisited ){
+                    step.enter('disabled');
+                }
             }
         });
     },
@@ -91,6 +98,14 @@ $.extend(Wizard.prototype, {
     },
 
     get: function(index) {
+        if(typeof index === 'string' && index.substring(0, 1) === '#'){
+            var id = index.substring(1);
+            for(var i in this.steps){
+                if(this.steps[i].$pane.attr('id') === id){
+                    return this.steps[i];
+                }
+            }
+        }
         if(index < this.length() && this.steps[index]){
             return this.steps[index];
         }

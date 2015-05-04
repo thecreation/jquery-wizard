@@ -1,4 +1,4 @@
-/*! jquery wizard - v0.1.0 - 2015-05-04
+/*! jquery wizard - v0.1.0 - 2015-05-05
  * https://github.com/amazingSurge/jquery-wizard
  * Copyright (c) 2015 amazingSurge; Licensed GPL */
 (function($, document, window, undefined) {
@@ -112,7 +112,11 @@
                 selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '');
             }
 
-            return $(selector);
+            if (selector) {
+                return $(selector);
+            } else {
+                return this.$element.find('.wizard-content').children().eq(index);
+            }
         },
 
         buttonsAppendTo: 'this',
@@ -148,8 +152,12 @@
             }
         },
 
+        cacheContent: false,
+
         autoFocus: true,
         keyboard: true,
+
+        enableWhenVisited: false,
 
         buttonLabels: {
             next: 'Next',
@@ -237,7 +245,7 @@
             }
 
             if (this.loader) {
-                this.load();
+                this.load(); // todo
             }
 
             this.trigger('beforeShow');
@@ -319,11 +327,6 @@
             this.$pane.empty();
         },
 
-        setLoader: function(loader) {
-            this.loader = loader;
-            return this;
-        },
-
         load: function(loader) {
             var self = this;
 
@@ -397,10 +400,6 @@
             this.wizard.trigger(event, this.index, method_arguments);
         },
 
-        is: function(state) {
-            return this.states[state] && this.states[state] === true;
-        },
-
         enter: function(state) {
             this.states[state] = true;
 
@@ -417,12 +416,24 @@
             }
         },
 
+        /*
+         * Public methods below
+         */
+        is: function(state) {
+            return this.states[state] && this.states[state] === true;
+        },
+
         reset: function() {
             for (var state in this.states) {
                 this.leave(state);
             }
             this.setup();
 
+            return this;
+        },
+
+        setLoader: function(loader) {
+            this.loader = loader;
             return this;
         },
 
@@ -436,10 +447,6 @@
 
         validate: function() {
             return this.validator.call(this.$pane.get(0), this);
-        },
-
-        getPane: function() {
-            return this.$pane;
         }
     });
 
@@ -515,11 +522,18 @@
 
         updateSteps: function() {
             var self = this;
+
+
             $.each(this.steps, function(i, step) {
+
                 if (i > self._current) {
                     step.leave('error');
                     step.leave('active');
                     step.leave('done');
+
+                    if (!self.options.enableWhenVisited) {
+                        step.enter('disabled');
+                    }
                 }
             });
         },
@@ -541,6 +555,14 @@
         },
 
         get: function(index) {
+            if (typeof index === 'string' && index.substring(0, 1) === '#') {
+                var id = index.substring(1);
+                for (var i in this.steps) {
+                    if (this.steps[i].$pane.attr('id') === id) {
+                        return this.steps[i];
+                    }
+                }
+            }
             if (index < this.length() && this.steps[index]) {
                 return this.steps[index];
             }

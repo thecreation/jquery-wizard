@@ -10,7 +10,11 @@ Wizard.defaults = {
             selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '');
         }
 
-        return $(selector);
+        if(selector) {
+            return $(selector);
+        } else {
+            return this.$element.find('.wizard-content').children().eq(index);
+        }
     },
 
     buttonsAppendTo: 'this',
@@ -46,8 +50,12 @@ Wizard.defaults = {
         }
     },
 
+    cacheContent: false,
+
     autoFocus: true,
     keyboard: true,
+
+    enableWhenVisited: false,
 
     buttonLabels: {
         next: 'Next',

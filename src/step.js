@@ -136,11 +136,6 @@ $.extend(Step.prototype, {
         this.$pane.empty();
     },
 
-    setLoader: function(loader){
-        this.loader = loader;
-        return this;
-    },
-
     load: function(loader) {
         var self = this;
 
@@ -214,10 +209,6 @@ $.extend(Step.prototype, {
         this.wizard.trigger(event, this.index, method_arguments);
     },
 
-    is: function(state) {
-            return this.states[state] && this.states[state] === true;
-    },
-
     enter: function(state) {
         this.states[state] = true;
 
@@ -234,12 +225,24 @@ $.extend(Step.prototype, {
         }
     },
 
+    /*
+     * Public methods below
+     */
+    is: function(state) {
+        return this.states[state] && this.states[state] === true;
+    },
+
     reset: function(){
         for(var state in this.states){
             this.leave(state);
         }
         this.setup();
 
+        return this;
+    },
+
+    setLoader: function(loader){
+        this.loader = loader;
         return this;
     },
 
@@ -253,9 +256,5 @@ $.extend(Step.prototype, {
 
     validate: function() {
         return this.validator.call(this.$pane.get(0), this);
-    },
-
-    getPane: function() {
-        return this.$pane;
     }
 });

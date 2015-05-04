@@ -236,6 +236,74 @@
     });
 </script>
     </section>
+
+    <section>
+        <h3>Events</h3>
+        <div id="exampleEvents" class="wizard">
+            <ul class="wizard-steps" role="tablist">
+                <li class="active" role="tab">
+                    Step 1
+                </li>
+                <li role="tab">
+                    Step 2
+                </li>
+                <li role="tab">
+                    Step 3
+                </li>
+            </ul>
+            <div class="wizard-content">
+                <div class="wizard-pane active" role="tabpanel">Step 1 Content</div>
+                <div class="wizard-pane" role="tabpanel">Step 2 Content</div>
+                <div class="wizard-pane" data-loader-url="ajax/3.html" role="tabpanel"></div>
+            </div>
+        </div>
+<script type="text/javascript">
+(function(){
+    $('#exampleEvents').wizard({
+        onInit: function(){
+            console.info('init');
+        },
+        onNext: function(from, to){
+            console.info('next:'+from.index+' to '+to.index);
+        },
+        onBack: function(from, to){
+            console.info('back:'+from.index+' to '+to.index);
+        },
+        onReset: function(){
+            console.info('reset');
+        },
+        onBeforeShow: function(step){
+            console.info('beforeShow:'+step.index);
+        },
+        onAfterShow: function(step){
+            console.info('afterShow:'+step.index);
+        },
+        onBeforeHide: function(step){
+            console.info('beforeHide:'+step.index);
+        },
+        onAfterHide: function(step){
+            console.info('afterHide:'+step.index);
+        },
+        onBeforeLoad: function(step){
+            console.info('beforeLoad:'+step.index);
+        },
+        onAfterLoad: function(step){
+            console.info('afterLoad:'+step.index);
+        },
+        onBeforeChange: function(from, to){
+            console.info('BeforeChange:'+from.index+' to '+to.index);
+        },
+        onAfterChange: function(from, to){
+            console.info('AfterChange:'+from.index+' to '+to.index);
+        },
+        onFinish: function(){
+            console.info('finish');
+            alert('finish');
+        }
+    });
+})();
+</script>
+    </section>
 </div>
 </body>
 </html>

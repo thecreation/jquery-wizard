@@ -220,7 +220,8 @@ $.extend(Step.prototype, {
                 this.events[event][i].apply(this, method_arguments);
             }
         }
-        this.wizard.trigger(event, this.index, method_arguments);
+
+        this.wizard.trigger.apply(this.wizard, [event, this].concat(method_arguments));
     },
 
     enter: function(state) {

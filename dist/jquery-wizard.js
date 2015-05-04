@@ -95,11 +95,6 @@
         setTimeout(callback, duration);
         return this;
     }
-
-    function capitalizeFirst(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    }
-
     Wizard.defaults = {
         step: '.wizard-steps > li',
 
@@ -411,7 +406,8 @@
                     this.events[event][i].apply(this, method_arguments);
                 }
             }
-            this.wizard.trigger(event, this.index, method_arguments);
+
+            this.wizard.trigger.apply(this.wizard, [event, this].concat(method_arguments));
         },
 
         enter: function(state) {
@@ -611,7 +607,7 @@
             return null;
         },
 
-        goTo: function(index) {
+        goTo: function(index, callback) {
             if (index === this._current || this.transitioning === true) {
                 return false;
             }
@@ -634,7 +630,7 @@
 
             var self = this;
             var process = function() {
-                self.trigger('beforeChange');
+                self.trigger('beforeChange', current, to);
                 self.transitioning = true;
 
                 current.hide();
@@ -655,9 +651,13 @@
                         }
                     }
 
-                    self.trigger('afterChange');
+                    if ($.isFunction(callback)) {
+                        callback.call(self);
+                    }
+
+                    self.trigger('afterChange', current, to);
                 });
-            }
+            };
 
             if (to.loader) {
                 to.load(function() {
@@ -671,6 +671,7 @@
         },
 
         trigger: function(eventType) {
+
             var method_arguments = Array.prototype.slice.call(arguments, 1);
             var data = [this].concat(method_arguments);
 
@@ -680,6 +681,7 @@
             eventType = eventType.replace(/\b\w+\b/g, function(word) {
                 return word.substring(0, 1).toUpperCase() + word.substring(1);
             });
+
             var onFunction = 'on' + eventType;
             if (typeof this.options[onFunction] === 'function') {
                 this.options[onFunction].apply(this, method_arguments);
@@ -704,7 +706,12 @@
 
         next: function() {
             if (this._current < this.lastIndex()) {
-                this.goTo(this._current + 1);
+                var from = this._current,
+                    to = this._current + 1;
+
+                this.goTo(to, function() {
+                    this.trigger('next', this.get(from), this.get(to));
+                });
             }
 
             return false;
@@ -712,7 +719,12 @@
 
         back: function() {
             if (this._current > 0) {
-                this.goTo(this._current - 1);
+                var from = this._current,
+                    to = this._current - 1;
+
+                this.goTo(to, function() {
+                    this.trigger('back', this.get(from), this.get(to));
+                });
             }
 
             return false;
@@ -734,6 +746,8 @@
             $.each(this.steps, function(i, step) {
                 step.reset();
             });
+
+            this.trigger('reset');
         }
     });
 

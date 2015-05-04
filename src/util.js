@@ -12,7 +12,3 @@ function emulateTransitionEnd($el, duration) {
     setTimeout(callback, duration);
     return this;
 }
-
-function capitalizeFirst(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}

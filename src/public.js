@@ -71,7 +71,6 @@ $.extend(Wizard.prototype, {
     updateSteps: function(){
         var self = this;
 
-
         $.each(this.steps, function(i, step){
             
             if(i > self._current){
@@ -106,15 +105,17 @@ $.extend(Wizard.prototype, {
                 }
             }
         }
+        
         if(index < this.length() && this.steps[index]){
             return this.steps[index];
         }
+
         return null;
     },
 
     goTo: function(index) {
         if(index === this._current || this.transitioning === true){
-            return;
+            return false;
         }
 
         var current = this.current();
@@ -124,7 +125,7 @@ $.extend(Wizard.prototype, {
             current.leave('done');
             current.enter('error');
 
-            return false;
+            return -1;
         } else {
             current.leave('error');
 
@@ -158,6 +159,8 @@ $.extend(Wizard.prototype, {
 
             self.trigger('afterChange');
         });
+
+        return true;
     },
 
     trigger: function(eventType){
@@ -204,6 +207,8 @@ $.extend(Wizard.prototype, {
         if(this._current > 0) {
             this.goTo(this._current -1);
         }
+
+        return false;
     },
 
     first: function() {

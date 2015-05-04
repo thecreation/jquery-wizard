@@ -152,8 +152,6 @@
             }
         },
 
-        cacheContent: false,
-
         autoFocus: true,
         keyboard: true,
 
@@ -170,6 +168,8 @@
             hide: function(step) {},
             fail: function(step) {},
         },
+
+        cacheContent: false,
 
         onInit: null,
         onNext: null,
@@ -202,6 +202,8 @@
 
             this.events = {};
             this.loader = null;
+            this.loaded = false;
+
             this.validator = function() {
                 return true;
             };
@@ -218,12 +220,18 @@
             this.$element.data('wizard-index', index);
 
             this.$pane = this.wizard.options.getPane.call(this.wizard, index, element);
+
+            this.setLoaderFromData();
         },
 
         setup: function() {
             var current = this.wizard.currentIndex();
             if (this.index === current) {
                 this.enter('active');
+
+                if (this.loader) {
+                    this.load();
+                }
             } else if (this.index > current) {
                 this.enter('disabled');
             }
@@ -337,6 +345,10 @@
                 loader = loader.call(this.wizard, this);
             }
 
+            if (this.wizard.options.cacheContent && this.loaded) {
+                return true;
+            }
+
             this.trigger('beforeLoad');
             this.enter('loading');
 
@@ -346,6 +358,8 @@
                 self.wizard.options.loading.hide.call(self.wizard, self);
 
                 self.leave('loading');
+
+                self.loaded = true;
                 self.trigger('afterLoad');
             }
 
@@ -416,9 +430,31 @@
             }
         },
 
+        setLoaderFromData: function() {
+            var loader = this.$pane.data('loader');
+
+            if (loader) {
+                if ($.isFunction(window[loader])) {
+                    this.loader = window[loader];
+                }
+            } else {
+                var url = this.$pane.data('loader-url');
+                if (url) {
+                    this.loader = {
+                        url: url,
+                        settings: this.$pane.data('settings') || {}
+                    }
+                }
+            }
+        },
+
         /*
          * Public methods below
          */
+        active: function() {
+            return this.wizard.goTo(this.index);
+        },
+
         is: function(state) {
             return this.states[state] && this.states[state] === true;
         },
@@ -434,6 +470,11 @@
 
         setLoader: function(loader) {
             this.loader = loader;
+
+            if (this.is('active')) {
+                this.load();
+            }
+
             return this;
         },
 
@@ -523,7 +564,6 @@
         updateSteps: function() {
             var self = this;
 
-
             $.each(this.steps, function(i, step) {
 
                 if (i > self._current) {
@@ -563,15 +603,17 @@
                     }
                 }
             }
+
             if (index < this.length() && this.steps[index]) {
                 return this.steps[index];
             }
+
             return null;
         },
 
         goTo: function(index) {
             if (index === this._current || this.transitioning === true) {
-                return;
+                return false;
             }
 
             var current = this.current();
@@ -581,7 +623,7 @@
                 current.leave('done');
                 current.enter('error');
 
-                return false;
+                return -1;
             } else {
                 current.leave('error');
 
@@ -615,6 +657,8 @@
 
                 self.trigger('afterChange');
             });
+
+            return true;
         },
 
         trigger: function(eventType) {
@@ -661,6 +705,8 @@
             if (this._current > 0) {
                 this.goTo(this._current - 1);
             }
+
+            return false;
         },
 
         first: function() {

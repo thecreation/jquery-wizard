@@ -127,29 +127,115 @@
 })();
 </script>
     </section>
-</div>
 
-
+    <section>
+        <h3>Loader</h3>
+        <div id="exampleLoader" class="wizard">
+            <ul class="wizard-steps" role="tablist">
+                <li data-target="#loader1" class="active" role="tab">
+                    Loader 1
+                </li>
+                <li data-target="#loader2" role="tab">
+                    Loader 2
+                </li>
+                <li data-target="#loader3" role="tab">
+                    Loader 3
+                </li>
+            </ul>
+            <div class="wizard-content">
+                <div class="wizard-pane active" id="loader1" role="tabpanel"></div>
+                <div class="wizard-pane" id="loader2" role="tabpanel"></div>
+                <div class="wizard-pane" id="loader3" role="tabpanel"></div>
+            </div>
+        </div>
 <script type="text/javascript">
-// .data('wizard');
+(function(){
+    var wizard = $('#exampleLoader').wizard({
+        onFinish: function(){
+            alert('finish');
+        }
+    }).data('wizard');
 
-//     var i = 1;
 
-//     wizard.get(1).setLoader(function(){
-//         return {
-//             url: 'ajax/1.html',
-//             settings: {
-//                 method: 'GET'
-//             }
-//         }
-//     }).setValidator(function(){
-//         i ++;
-//         if(i % 2 == 1){
-//             return true;
-//         } else {
-//             return false;
-//         }
-//     });
+    wizard.get('#loader1').setLoader(function(){
+        return '<h4>Hello World</h4>'+
+        '<p>some content</p>';
+    });
+
+    // use jquery ajax object
+    // http://api.jquery.com/jQuery.ajax/
+    wizard.get('#loader2').setLoader({
+        url: 'ajax/1.html',
+        settings: {
+            type: 'GET',
+            dataType: 'html'
+        }
+    });
+    
+    // We can using callback process the ajax object. It will be called when we load the content.
+    wizard.get('#loader3').setLoader(function(){
+        return {
+            url: 'ajax/2.html',
+            settings: {
+                type: 'POST',
+                data: {
+                    email: $("#inputEmail").val(),
+                    password: $('#inputPassword').val()
+                }
+            }
+        };
+    });
+})();
 </script>
+    </section>
+
+    <section>
+        <h3>Loader with Pane data attr</h3>
+        <div id="exampleLoaderAttr" class="wizard">
+            <ul class="wizard-steps" role="tablist">
+                <li class="active" role="tab">
+                    Loader 1
+                </li>
+                <li role="tab">
+                    Loader 2
+                </li>
+                <li role="tab">
+                    Loader 3
+                </li>
+            </ul>
+            <div class="wizard-content">
+                <div class="wizard-pane active" data-loader="loaderCallback" role="tabpanel"></div>
+                <div class="wizard-pane" data-loader-url="ajax/1.html" data-loader-setting='{"type": "GET","dataType": "html"}' role="tabpanel"></div>
+                <div class="wizard-pane" data-loader="loaderAjaxCallback" role="tabpanel"></div>
+            </div>
+        </div>
+<script type="text/javascript">
+    function loaderCallback(){
+        return '<h4>Hello World</h4>'+
+        '<p>some content</p>';
+    }
+
+    function loaderAjaxCallback(){
+        return {
+            url: 'ajax/2.html',
+            settings: {
+                type: 'POST',
+                data: {
+                    email: $("#inputEmail").val(),
+                    password: $('#inputPassword').val()
+                }
+            }
+        };
+    }
+
+    $('#exampleLoaderAttr').wizard({
+        cacheContent: true,
+        onFinish: function(){
+            alert('finish');
+        }
+    });
+</script>
+    </section>
+</div>
 </body>
 </html>

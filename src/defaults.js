@@ -50,8 +50,6 @@ Wizard.defaults = {
         }
     },
 
-    cacheContent: false,
-
     autoFocus: true,
     keyboard: true,
 
@@ -68,6 +66,8 @@ Wizard.defaults = {
         hide: function(step) {},
         fail: function(step) {},
     },
+
+    cacheContent: false,
 
     onInit: null,
     onNext: null,

@@ -11,6 +11,8 @@ $.extend(Step.prototype, {
 
         this.events = {};
         this.loader = null;
+        this.loaded = false;
+
         this.validator = function(){
             return true;
         };
@@ -27,12 +29,18 @@ $.extend(Step.prototype, {
         this.$element.data('wizard-index', index);
 
         this.$pane = this.wizard.options.getPane.call(this.wizard, index, element);
+
+        this.setLoaderFromData();
     },
 
     setup: function() {
         var current = this.wizard.currentIndex();
         if(this.index === current){
             this.enter('active');
+
+            if(this.loader){
+                this.load();
+            }
         } else if (this.index > current){
             this.enter('disabled');
         }
@@ -146,6 +154,10 @@ $.extend(Step.prototype, {
             loader = loader.call(this.wizard, this);
         }
 
+        if(this.wizard.options.cacheContent && this.loaded){
+            return true;
+        }
+
         this.trigger('beforeLoad');
         this.enter('loading');
 
@@ -155,6 +167,8 @@ $.extend(Step.prototype, {
             self.wizard.options.loading.hide.call(self.wizard, self);
 
             self.leave('loading');
+
+            self.loaded = true;
             self.trigger('afterLoad');
         }
 
@@ -225,9 +239,31 @@ $.extend(Step.prototype, {
         }
     },
 
+    setLoaderFromData: function(){
+        var loader = this.$pane.data('loader');
+
+        if(loader){
+            if($.isFunction(window[loader])){
+                this.loader = window[loader];
+            }
+        } else {
+            var url = this.$pane.data('loader-url');
+            if(url){
+                this.loader = {
+                    url: url,
+                    settings: this.$pane.data('settings') || {}
+                }
+            }
+        }
+    },
+
     /*
      * Public methods below
      */
+    active: function(){
+        return this.wizard.goTo(this.index);
+    },
+
     is: function(state) {
         return this.states[state] && this.states[state] === true;
     },
@@ -243,6 +279,11 @@ $.extend(Step.prototype, {
 
     setLoader: function(loader){
         this.loader = loader;
+
+        if(this.is('active')){
+            this.load();
+        }
+
         return this;
     },
 

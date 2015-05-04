@@ -1,9 +1,15 @@
 Wizard.defaults = {
-    step: '.steps > li',
-    buttonsAppendTo: '',
+    step: '.wizard-steps > li',
+    pane: '.wizard-content > pane',
+    buttonsAppendTo: 'this',
     templates: {
-        button: function(action, label){
-            return '<li class="'+action+'"><a href="'+this.id+'" data-wizard="'+action+'" role="button">'+label+'</a></li>';
+        buttons: function(){
+            var options = this.options;
+            return '<div class="wizard-buttons">'+
+                '<a class="'+options.classes.button.back+'" href="#'+this.id+'" data-wizard="back" role="button">'+options.buttonLabels.back+'</a>' +
+                '<a class="'+options.classes.button.next+'" href="#'+this.id+'" data-wizard="next" role="button">'+options.buttonLabels.next+'</a>' +
+                '<a class="'+options.classes.button.finish+'" href="#'+this.id+'" data-wizard="finish" role="button">'+options.buttonLabels.finish+'</a>' +
+            '</div>';
         }
     },
 
@@ -22,10 +28,11 @@ Wizard.defaults = {
             activing: 'activing'
         },
 
-        buttons: {
-            disabled: '',
-            prev: '',
+        button: {
+            hide: 'hide',
+            disabled: 'disabled',
             next: '',
+            back: '',
             finish: ''
         }
     },
@@ -35,7 +42,7 @@ Wizard.defaults = {
 
     buttonLabels: {
         next: 'Next',
-        previous:'Previous',
+        back: 'Back',
         finish: 'Finish'
     },
 
@@ -48,7 +55,7 @@ Wizard.defaults = {
     onReset: null,
 
     onNext: null,
-    onprev: null,
+    onBack: null,
 
     onFirst: null,
     onLast: null,

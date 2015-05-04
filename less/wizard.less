@@ -1,7 +1,12 @@
 
 @transition-duration: .2s;
 
-.step-pane  {
+.hide {
+    display: none;
+}
+
+// core
+.wizard-pane  {
   position: absolute;
   opacity: 0;
   top: 0;
@@ -20,16 +25,16 @@
   }
 }
 
-.step-content {
+.wizard-content {
   position: relative;
   padding: 0;
   transition: height @transition-duration ease;
 }
 
 // styles
-.step-pane {
+.wizard-pane {
   padding: 10px;
 }
-.step-content {
+.wizard-content {
   border: 1px solid #aaa;
 }

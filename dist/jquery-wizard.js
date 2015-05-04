@@ -1,4 +1,4 @@
-/*! jquery wizard - v0.1.0 - 2015-05-03
+/*! jquery wizard - v0.1.0 - 2015-05-04
  * https://github.com/amazingSurge/jquery-wizard
  * Copyright (c) 2015 amazingSurge; Licensed GPL */
 (function($, document, window, undefined) {
@@ -63,12 +63,20 @@
     })();
 
 
+    var counter = 0;
+
     var Wizard = function(element, options) {
         this.$element = $(element);
 
         this.options = $.extend(true, {}, Wizard.defaults, options);
 
         this.$steps = this.$element.find(this.options.step);
+
+        this.id = this.$element.attr('id');
+        if (!this.id) {
+            this.id = 'wizard-' + (++counter);
+            this.$element.attr('id', this.id);
+        }
 
         this.initialize();
     }
@@ -93,11 +101,17 @@
     }
 
     Wizard.defaults = {
-        step: '.steps > li',
-        buttonsAppendTo: '',
+        step: '.wizard-steps > li',
+        pane: '.wizard-content > pane',
+        buttonsAppendTo: 'this',
         templates: {
-            button: function(action, label) {
-                return '<li class="' + action + '"><a href="' + this.id + '" data-wizard="' + action + '" role="button">' + label + '</a></li>';
+            buttons: function() {
+                var options = this.options;
+                return '<div class="wizard-buttons">' +
+                    '<a class="' + options.classes.button.back + '" href="#' + this.id + '" data-wizard="back" role="button">' + options.buttonLabels.back + '</a>' +
+                    '<a class="' + options.classes.button.next + '" href="#' + this.id + '" data-wizard="next" role="button">' + options.buttonLabels.next + '</a>' +
+                    '<a class="' + options.classes.button.finish + '" href="#' + this.id + '" data-wizard="finish" role="button">' + options.buttonLabels.finish + '</a>' +
+                    '</div>';
             }
         },
 
@@ -116,10 +130,11 @@
                 activing: 'activing'
             },
 
-            buttons: {
-                disabled: '',
-                prev: '',
+            button: {
+                hide: 'hide',
+                disabled: 'disabled',
                 next: '',
+                back: '',
                 finish: ''
             }
         },
@@ -129,7 +144,7 @@
 
         buttonLabels: {
             next: 'Next',
-            previous: 'Previous',
+            back: 'Back',
             finish: 'Finish'
         },
 
@@ -142,7 +157,7 @@
         onReset: null,
 
         onNext: null,
-        onprev: null,
+        onBack: null,
 
         onFirst: null,
         onLast: null,
@@ -439,21 +454,56 @@
                 step.setup();
             });
 
+            this.setup();
+
             this.$element.on('click', this.options.step, function(e) {
                 var index = $(this).data('wizard-index');
                 self.goTo(index);
             });
 
             if (this.options.keyboard) {
-                $(document).on('keyup', $.proxy(this._keydown, this));
+                $(document).on('keyup', $.proxy(this.keydown, this));
             }
         },
 
-        _keydown: function(e) {
+        setup: function() {
+            this.$buttons = $(this.options.templates.buttons.call(this));
+
+            this.updateButton();
+
+            if (this.options.buttonsAppendTo === 'this') {
+                this.$buttons.appendTo(this.$element);
+            } else {
+                this.$buttons.appendTo(this.options.buttonsAppendTo);
+            }
+        },
+
+        updateButton: function() {
+            var classes = this.options.classes.button;
+            var $back = this.$buttons.find('[data-wizard="back"]');
+            var $next = this.$buttons.find('[data-wizard="next"]');
+            var $finish = this.$buttons.find('[data-wizard="finish"]');
+
+            if (this._current === 0) {
+                $back.addClass(classes.disabled);
+            } else {
+                $back.removeClass(classes.disabled);
+            }
+
+            if (this._current === this.length() - 1) {
+                $next.addClass(classes.hide);
+                $finish.removeClass(classes.hide);
+            } else {
+                $next.removeClass(classes.hide);
+                $finish.addClass(classes.hide);
+            }
+        },
+
+        keydown: function(e) {
             if (/input|textarea/i.test(e.target.tagName)) return;
             switch (e.which) {
                 case 37:
-                    this.prev();
+                    this.back();
                     break;
                 case 39:
                     this.next();
@@ -500,6 +550,8 @@
                 self._current = index;
                 self.transitioning = false;
 
+                self.updateButton();
+
                 if (self.options.autoFocus) {
                     var $input = this.$panel.find(':input');
                     if ($input.length > 0) {
@@ -537,7 +589,7 @@
             return false;
         },
 
-        prev: function() {
+        back: function() {
             if (this._current > 0) {
                 this.goTo(this._current - 1);
             }
@@ -573,7 +625,7 @@
 
         var method = $this.data('wizard');
 
-        if (/^(prev|next|first|finish|reset)$/.test(method)) {
+        if (/^(back|next|first|finish|reset)$/.test(method)) {
             wizard[method]();
         }
 

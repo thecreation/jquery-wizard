@@ -15,20 +15,55 @@ $.extend(Wizard.prototype, {
             step.setup();
         });
 
+        this.setup();
+
         this.$element.on('click', this.options.step, function(e){
             var index = $(this).data('wizard-index');
             self.goTo(index);
         });
 
         if(this.options.keyboard){
-            $(document).on('keyup', $.proxy(this._keydown, this));
+            $(document).on('keyup', $.proxy(this.keydown, this));
         }
     },
 
-    _keydown: function(e) {
+    setup: function(){
+        this.$buttons = $(this.options.templates.buttons.call(this));
+
+        this.updateButton();
+
+        if(this.options.buttonsAppendTo ==='this'){
+            this.$buttons.appendTo(this.$element);
+        } else {
+            this.$buttons.appendTo(this.options.buttonsAppendTo);
+        }
+    },
+
+    updateButton: function(){
+        var classes = this.options.classes.button;
+        var $back = this.$buttons.find('[data-wizard="back"]');
+        var $next = this.$buttons.find('[data-wizard="next"]');
+        var $finish = this.$buttons.find('[data-wizard="finish"]');
+
+        if(this._current === 0){
+            $back.addClass(classes.disabled);
+        } else {
+            $back.removeClass(classes.disabled);
+        }
+
+        if(this._current === this.length() - 1) {
+            $next.addClass(classes.hide);
+            $finish.removeClass(classes.hide);
+        } else {
+            $next.removeClass(classes.hide);
+            $finish.addClass(classes.hide);
+        }
+    },
+
+    keydown: function(e) {
         if (/input|textarea/i.test(e.target.tagName)) return;
         switch (e.which) {
-            case 37: this.prev(); break;
+            case 37: this.back(); break;
             case 39: this.next(); break;
             default: return;
         }
@@ -71,6 +106,8 @@ $.extend(Wizard.prototype, {
             self._current = index;
             self.transitioning = false;
 
+            self.updateButton();
+
             if(self.options.autoFocus){
                 var $input = this.$panel.find(':input');
                 if($input.length > 0) {
@@ -108,7 +145,7 @@ $.extend(Wizard.prototype, {
         return false;
     },
 
-    prev: function() {
+    back: function() {
         if(this._current > 0) {
             this.goTo(this._current -1);
         }

@@ -11,7 +11,7 @@ $(document).on('click', '[data-wizard]', function(e){
 
     var method = $this.data('wizard');
 
-    if(/^(prev|next|first|finish|reset)$/.test(method)){
+    if(/^(back|next|first|finish|reset)$/.test(method)){
         wizard[method]();
     }
 

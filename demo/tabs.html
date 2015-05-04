@@ -13,11 +13,11 @@
 <link rel="stylesheet" href="../libs/bootstrap/bootstrap.min.css">
 
 <style>
-.done {
-    color: green !important;
-}
 .current {
     color: blue !important;
+}
+.done {
+    color: green !important;
 }
 .error {
     color: red !important;
@@ -70,8 +70,7 @@
             }
         },
 
-        onBeforeShow: function(index){
-            var step = this.get(index);
+        onBeforeShow: function(step){
             step.$element.tab('show');
         },
 

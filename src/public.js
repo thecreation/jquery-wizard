@@ -19,9 +19,13 @@ $.extend(Wizard.prototype, {
 
         this.$element.on('click', this.options.step, function(e){
             var index = $(this).data('wizard-index');
-            self.goTo(index);
+
+            if(!self.get(index).is('disabled')){
+                self.goTo(index);
+            }
 
             e.preventDefault();
+            e.stopPropagation();
         });
 
         if(this.options.keyboard){
@@ -55,7 +59,7 @@ $.extend(Wizard.prototype, {
             $back.removeClass(classes.disabled);
         }
 
-        if(this._current === this.length() - 1) {
+        if(this._current === this.lastIndex()) {
             $next.addClass(classes.hide);
             $finish.removeClass(classes.hide);
         } else {
@@ -99,6 +103,7 @@ $.extend(Wizard.prototype, {
         }
 
         var current = this.current();
+        var to = this.get(index);
 
         if(!current.validate()){
             current.leave('done');
@@ -119,9 +124,10 @@ $.extend(Wizard.prototype, {
         var self = this;
 
         current.hide();
-        this.get(index).show(function(){
+        to.show(function(){
             self._current = index;
             self.transitioning = false;
+            this.leave('disabled');
 
             self.updateButtons();
             self.updateSteps();
@@ -172,7 +178,7 @@ $.extend(Wizard.prototype, {
     },
 
     next: function() {
-        if(this._current < this.length() - 1){
+        if(this._current < this.lastIndex()){
             this.goTo(this._current + 1);
         }
 

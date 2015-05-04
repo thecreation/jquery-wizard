@@ -120,9 +120,9 @@
             buttons: function() {
                 var options = this.options;
                 return '<div class="wizard-buttons">' +
-                    '<a class="' + options.classes.button.back + '" href="#' + this.id + '" data-wizard="back" role="button">' + options.buttonLabels.back + '</a>' +
-                    '<a class="' + options.classes.button.next + '" href="#' + this.id + '" data-wizard="next" role="button">' + options.buttonLabels.next + '</a>' +
-                    '<a class="' + options.classes.button.finish + '" href="#' + this.id + '" data-wizard="finish" role="button">' + options.buttonLabels.finish + '</a>' +
+                    '<a class="wizard-back" href="#' + this.id + '" data-wizard="back" role="button">' + options.buttonLabels.back + '</a>' +
+                    '<a class="wizard-next" href="#' + this.id + '" data-wizard="next" role="button">' + options.buttonLabels.next + '</a>' +
+                    '<a class="wizard-finish" href="#' + this.id + '" data-wizard="finish" role="button">' + options.buttonLabels.finish + '</a>' +
                     '</div>';
             }
         },
@@ -144,10 +144,7 @@
 
             button: {
                 hide: 'hide',
-                disabled: 'disabled',
-                next: '',
-                back: '',
-                finish: ''
+                disabled: 'disabled'
             }
         },
 
@@ -196,6 +193,7 @@
             this.wizard = wizard;
 
             this.events = {};
+            this.loader = null;
             this.validator = function() {
                 return true;
             };
@@ -218,6 +216,8 @@
             var current = this.wizard.currentIndex();
             if (this.index === current) {
                 this.enter('active');
+            } else if (this.index > current) {
+                this.enter('disabled');
             }
 
             this.$element.attr('aria-expanded', this.is('active'));
@@ -234,6 +234,10 @@
         show: function(callback) {
             if (this.is('activing') || this.is('active')) {
                 return;
+            }
+
+            if (this.loader) {
+                this.load();
             }
 
             this.trigger('beforeShow');
@@ -315,9 +319,20 @@
             this.$pane.empty();
         },
 
-        load: function(object) {
-            var options = object.options;
+        setLoader: function(loader) {
+            this.loader = loader;
+            return this;
+        },
+
+        load: function(loader) {
             var self = this;
+
+            if (!loader) {
+                loader = this.loader;
+            }
+            if ($.isFunction(loader)) {
+                loader = loader.call(this.wizard, this);
+            }
 
             this.trigger('beforeLoad');
             this.enter('loading');
@@ -331,12 +346,12 @@
                 self.trigger('afterLoad');
             }
 
-            if (object.content) {
-                setContent(object.content);
-            } else if (object.url) {
+            if (typeof loader === 'string') {
+                setContent(loader);
+            } else if (typeof loader === 'object' && loader.hasOwnProperty('url')) {
                 self.wizard.options.loading.show.call(self.wizard, self);
 
-                $.ajax(object.url, object.settings || {}).done(function(data) {
+                $.ajax(loader.url, loader.settings || {}).done(function(data) {
                     setContent(data);
                 }).fail(function() {
                     self.wizard.options.loading.fail.call(self.wizard, self);
@@ -382,16 +397,10 @@
             this.wizard.trigger(event, this.index, method_arguments);
         },
 
-        /**
-         * Checks whether the carousel is in a specific state or not.
-         */
         is: function(state) {
             return this.states[state] && this.states[state] === true;
         },
 
-        /**
-         * Enters a state.
-         */
         enter: function(state) {
             this.states[state] = true;
 
@@ -399,9 +408,6 @@
             this.$element.addClass(classes.step[state]);
         },
 
-        /**
-         * Leaves a state.
-         */
         leave: function(state) {
             if (this.states[state]) {
                 this.states[state] = false;
@@ -458,9 +464,13 @@
 
             this.$element.on('click', this.options.step, function(e) {
                 var index = $(this).data('wizard-index');
-                self.goTo(index);
+
+                if (!self.get(index).is('disabled')) {
+                    self.goTo(index);
+                }
 
                 e.preventDefault();
+                e.stopPropagation();
             });
 
             if (this.options.keyboard) {
@@ -494,7 +504,7 @@
                 $back.removeClass(classes.disabled);
             }
 
-            if (this._current === this.length() - 1) {
+            if (this._current === this.lastIndex()) {
                 $next.addClass(classes.hide);
                 $finish.removeClass(classes.hide);
             } else {
@@ -543,6 +553,7 @@
             }
 
             var current = this.current();
+            var to = this.get(index);
 
             if (!current.validate()) {
                 current.leave('done');
@@ -563,9 +574,10 @@
             var self = this;
 
             current.hide();
-            this.get(index).show(function() {
+            to.show(function() {
                 self._current = index;
                 self.transitioning = false;
+                this.leave('disabled');
 
                 self.updateButtons();
                 self.updateSteps();
@@ -616,7 +628,7 @@
         },
 
         next: function() {
-            if (this._current < this.length() - 1) {
+            if (this._current < this.lastIndex()) {
                 this.goTo(this._current + 1);
             }
 

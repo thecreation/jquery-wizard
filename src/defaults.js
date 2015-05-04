@@ -18,9 +18,9 @@ Wizard.defaults = {
         buttons: function(){
             var options = this.options;
             return '<div class="wizard-buttons">'+
-                '<a class="'+options.classes.button.back+'" href="#'+this.id+'" data-wizard="back" role="button">'+options.buttonLabels.back+'</a>' +
-                '<a class="'+options.classes.button.next+'" href="#'+this.id+'" data-wizard="next" role="button">'+options.buttonLabels.next+'</a>' +
-                '<a class="'+options.classes.button.finish+'" href="#'+this.id+'" data-wizard="finish" role="button">'+options.buttonLabels.finish+'</a>' +
+                '<a class="wizard-back" href="#'+this.id+'" data-wizard="back" role="button">'+options.buttonLabels.back+'</a>' +
+                '<a class="wizard-next" href="#'+this.id+'" data-wizard="next" role="button">'+options.buttonLabels.next+'</a>' +
+                '<a class="wizard-finish" href="#'+this.id+'" data-wizard="finish" role="button">'+options.buttonLabels.finish+'</a>' +
             '</div>';
         }
     },
@@ -42,10 +42,7 @@ Wizard.defaults = {
 
         button: {
             hide: 'hide',
-            disabled: 'disabled',
-            next: '',
-            back: '',
-            finish: ''
+            disabled: 'disabled'
         }
     },
 

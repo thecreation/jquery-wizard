@@ -60,6 +60,7 @@
 (function(){
     var wizard = $('.wizard').wizard({
         step: '.wizard-steps > li',
+
         onFinish: function(){
             alert('finish');
         }
@@ -67,8 +68,13 @@
 
     var i = 1;
 
-    wizard.get(0).on('leaveActive', function(){
-        console.info('leave');
+    wizard.get(1).setLoader(function(){
+        return {
+            url: 'ajax/1.html',
+            settings: {
+                method: 'GET'
+            }
+        }
     }).setValidator(function(){
         i ++;
         if(i % 2 == 1){

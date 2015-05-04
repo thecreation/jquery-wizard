@@ -10,6 +10,7 @@ $.extend(Step.prototype, {
         this.wizard = wizard;
 
         this.events = {};
+        this.loader = null;
         this.validator = function(){
             return true;
         };
@@ -32,6 +33,8 @@ $.extend(Step.prototype, {
         var current = this.wizard.currentIndex();
         if(this.index === current){
             this.enter('active');
+        } else if (this.index > current){
+            this.enter('disabled');
         }
 
         this.$element.attr('aria-expanded', this.is('active'));
@@ -48,6 +51,10 @@ $.extend(Step.prototype, {
     show: function(callback) {
         if(this.is('activing') || this.is('active')) {
             return;
+        }
+
+        if(this.loader){
+            this.load(); // todo
         }
 
         this.trigger('beforeShow');
@@ -129,9 +136,20 @@ $.extend(Step.prototype, {
         this.$pane.empty();
     },
 
-    load: function(object) {
-        var options = object.options;
+    setLoader: function(loader){
+        this.loader = loader;
+        return this;
+    },
+
+    load: function(loader) {
         var self = this;
+
+        if(!loader){
+            loader = this.loader;
+        }
+        if($.isFunction(loader)){
+            loader = loader.call(this.wizard, this);
+        }
 
         this.trigger('beforeLoad');
         this.enter('loading');
@@ -145,12 +163,12 @@ $.extend(Step.prototype, {
             self.trigger('afterLoad');
         }
 
-        if (object.content) {
-            setContent(object.content);
-        } else if (object.url) {
+        if (typeof loader === 'string') {
+            setContent(loader);
+        } else if (typeof loader === 'object' && loader.hasOwnProperty('url')) {
             self.wizard.options.loading.show.call(self.wizard, self);
 
-            $.ajax(object.url, object.settings || {}).done(function(data) {
+            $.ajax(loader.url, loader.settings || {}).done(function(data) {
                 setContent(data);
             }).fail(function(){
                 self.wizard.options.loading.fail.call(self.wizard, self);
@@ -196,16 +214,10 @@ $.extend(Step.prototype, {
         this.wizard.trigger(event, this.index, method_arguments);
     },
 
-    /**
-     * Checks whether the carousel is in a specific state or not.
-     */
     is: function(state) {
             return this.states[state] && this.states[state] === true;
     },
 
-    /**
-     * Enters a state.
-     */
     enter: function(state) {
         this.states[state] = true;
 
@@ -213,9 +225,6 @@ $.extend(Step.prototype, {
         this.$element.addClass(classes.step[state]);
     },
 
-    /**
-     * Leaves a state.
-     */
     leave: function(state) {
         if(this.states[state]){
             this.states[state] = false;

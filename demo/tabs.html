@@ -62,15 +62,11 @@
         templates: {
             buttons: function(){
                 var options = this.options;
-                return '<ul class="pager">' +
-                    '<li class="previous">'+
-                        '<a class="'+options.classes.button.back+'" href="#'+this.id+'" data-wizard="back" role="button">'+options.buttonLabels.back+'</a>' +
-                    '</li>' +
-                    '<li class="next">'+
-                    '<a class="'+options.classes.button.next+'" href="#'+this.id+'" data-wizard="next" role="button">'+options.buttonLabels.next+'</a>' +
-                    '<a class="'+options.classes.button.finish+'" href="#'+this.id+'" data-wizard="finish" role="button">'+options.buttonLabels.finish+'</a>' +
-                    '</li>'+
-                '</ul>';
+                return '<div class="clearfix">' +
+                    '<button class="btn btn-default" data-target="#'+this.id+'" data-wizard="back">'+options.buttonLabels.back+'</button>' +
+                    '<button class="btn btn-primary pull-right" data-target="#'+this.id+'" data-wizard="next">'+options.buttonLabels.next+'</button>' +
+                    '<button class="btn btn-primary pull-right" data-target="#'+this.id+'" data-wizard="finish">'+options.buttonLabels.finish+'</button>' +
+                '</div>';
             }
         },
 

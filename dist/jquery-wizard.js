@@ -1,4 +1,4 @@
-/*! jquery wizard - v0.1.0 - 2015-05-05
+/*! jquery wizard - v0.2.0 - 2015-05-05
  * https://github.com/amazingSurge/jquery-wizard
  * Copyright (c) 2015 amazingSurge; Licensed GPL */
 (function($, document, window, undefined) {
@@ -252,10 +252,6 @@
                 return;
             }
 
-            if (this.loader) {
-                this.load(); // todo
-            }
-
             this.trigger('beforeShow');
             this.enter('activing');
 
@@ -335,17 +331,18 @@
             this.$pane.empty();
         },
 
-        load: function(loader) {
+        load: function(callback) {
             var self = this;
+            var loader = this.loader;
 
-            if (!loader) {
-                loader = this.loader;
-            }
             if ($.isFunction(loader)) {
                 loader = loader.call(this.wizard, this);
             }
 
             if (this.wizard.options.cacheContent && this.loaded) {
+                if ($.isFunction(callback)) {
+                    callback.call(this);
+                }
                 return true;
             }
 
@@ -355,12 +352,13 @@
             function setContent(content) {
                 self.$pane.html(content);
 
-                self.wizard.options.loading.hide.call(self.wizard, self);
-
                 self.leave('loading');
-
                 self.loaded = true;
                 self.trigger('afterLoad');
+
+                if ($.isFunction(callback)) {
+                    callback.call(this);
+                }
             }
 
             if (typeof loader === 'string') {
@@ -370,6 +368,8 @@
 
                 $.ajax(loader.url, loader.settings || {}).done(function(data) {
                     setContent(data);
+
+                    self.wizard.options.loading.hide.call(self.wizard, self);
                 }).fail(function() {
                     self.wizard.options.loading.fail.call(self.wizard, self);
                 });
@@ -632,31 +632,40 @@
                 }
             }
 
-            this.trigger('beforeChange');
-
-            this.transitioning = true;
             var self = this;
+            var process = function() {
+                self.trigger('beforeChange');
+                self.transitioning = true;
 
-            current.hide();
-            to.show(function() {
-                self._current = index;
-                self.transitioning = false;
-                this.leave('disabled');
+                current.hide();
+                to.show(function() {
+                    self._current = index;
+                    self.transitioning = false;
+                    this.leave('disabled');
 
-                self.updateButtons();
-                self.updateSteps();
+                    self.updateButtons();
+                    self.updateSteps();
 
-                if (self.options.autoFocus) {
-                    var $input = this.$pane.find(':input');
-                    if ($input.length > 0) {
-                        $input.eq(0).focus();
-                    } else {
-                        this.$pane.focus();
+                    if (self.options.autoFocus) {
+                        var $input = this.$pane.find(':input');
+                        if ($input.length > 0) {
+                            $input.eq(0).focus();
+                        } else {
+                            this.$pane.focus();
+                        }
                     }
-                }
 
-                self.trigger('afterChange');
-            });
+                    self.trigger('afterChange');
+                });
+            }
+
+            if (to.loader) {
+                to.load(function() {
+                    process();
+                });
+            } else {
+                process();
+            }
 
             return true;
         },

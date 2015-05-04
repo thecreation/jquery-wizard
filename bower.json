@@ -1,6 +1,6 @@
 {
   "name": "jquery-wizard",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "jquery wizard is a lightweight jquery plugin for wizard contents.",
   "main": "dist/jquery-wizard.js",
   "copyright": "amazingSurge",

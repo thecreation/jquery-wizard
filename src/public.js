@@ -105,7 +105,7 @@ $.extend(Wizard.prototype, {
                 }
             }
         }
-        
+
         if(index < this.length() && this.steps[index]){
             return this.steps[index];
         }
@@ -134,31 +134,40 @@ $.extend(Wizard.prototype, {
             }
         }
 
-        this.trigger('beforeChange');
-
-        this.transitioning = true;
         var self = this;
+        var process = function (){
+            self.trigger('beforeChange');
+            self.transitioning = true;
+            
+            current.hide();
+            to.show(function(){
+                self._current = index;
+                self.transitioning = false;
+                this.leave('disabled');
 
-        current.hide();
-        to.show(function(){
-            self._current = index;
-            self.transitioning = false;
-            this.leave('disabled');
+                self.updateButtons();
+                self.updateSteps();
 
-            self.updateButtons();
-            self.updateSteps();
-
-            if(self.options.autoFocus){
-                var $input = this.$pane.find(':input');
-                if($input.length > 0) {
-                    $input.eq(0).focus();
-                } else {
-                    this.$pane.focus();
+                if(self.options.autoFocus){
+                    var $input = this.$pane.find(':input');
+                    if($input.length > 0) {
+                        $input.eq(0).focus();
+                    } else {
+                        this.$pane.focus();
+                    }
                 }
-            }
 
-            self.trigger('afterChange');
-        });
+                self.trigger('afterChange');
+            });
+        }
+
+        if(to.loader){
+            to.load(function(){
+                process();
+            });
+        } else {
+            process();
+        }
 
         return true;
     },

@@ -61,10 +61,6 @@ $.extend(Step.prototype, {
             return;
         }
 
-        if(this.loader){
-            this.load(); // todo
-        }
-
         this.trigger('beforeShow');
         this.enter('activing');
 
@@ -144,17 +140,18 @@ $.extend(Step.prototype, {
         this.$pane.empty();
     },
 
-    load: function(loader) {
+    load: function(callback) {
         var self = this;
+        var loader = this.loader;
 
-        if(!loader){
-            loader = this.loader;
-        }
         if($.isFunction(loader)){
             loader = loader.call(this.wizard, this);
         }
 
         if(this.wizard.options.cacheContent && this.loaded){
+            if($.isFunction(callback)){
+                callback.call(this);
+            }
             return true;
         }
 
@@ -164,12 +161,13 @@ $.extend(Step.prototype, {
         function setContent(content) {
             self.$pane.html(content);
 
-            self.wizard.options.loading.hide.call(self.wizard, self);
-
             self.leave('loading');
-
             self.loaded = true;
             self.trigger('afterLoad');
+
+            if($.isFunction(callback)){
+                callback.call(this);
+            }
         }
 
         if (typeof loader === 'string') {
@@ -179,6 +177,8 @@ $.extend(Step.prototype, {
 
             $.ajax(loader.url, loader.settings || {}).done(function(data) {
                 setContent(data);
+
+                self.wizard.options.loading.hide.call(self.wizard, self);
             }).fail(function(){
                 self.wizard.options.loading.fail.call(self.wizard, self);
             });

@@ -1,6 +1,18 @@
 Wizard.defaults = {
     step: '.wizard-steps > li',
-    pane: '.wizard-content > pane',
+
+    getPane: function(index, step){
+        var $step = $(step);
+        var selector = $step.data('target');
+
+        if (!selector) {
+            selector = $step.attr('href');
+            selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '');
+        }
+
+        return $(selector);
+    },
+
     buttonsAppendTo: 'this',
     templates: {
         buttons: function(){

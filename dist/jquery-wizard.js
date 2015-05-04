@@ -102,7 +102,19 @@
 
     Wizard.defaults = {
         step: '.wizard-steps > li',
-        pane: '.wizard-content > pane',
+
+        getPane: function(index, step) {
+            var $step = $(step);
+            var selector = $step.data('target');
+
+            if (!selector) {
+                selector = $step.attr('href');
+                selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '');
+            }
+
+            return $(selector);
+        },
+
         buttonsAppendTo: 'this',
         templates: {
             buttons: function() {
@@ -204,17 +216,9 @@
             };
 
             this.index = index;
-
             this.$element.data('wizard-index', index);
 
-            var selector = this.$element.data('target');
-
-            if (!selector) {
-                selector = this.$element.attr('href');
-                selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '');
-            }
-
-            this.$panel = $(selector);
+            this.$pane = this.wizard.options.getPane.call(this.wizard, index, element);
         },
 
         setup: function() {
@@ -223,13 +227,13 @@
             }
 
             this.$element.attr('aria-expanded', this.is('active'));
-            this.$panel.attr('aria-expanded', this.is('active'));
+            this.$pane.attr('aria-expanded', this.is('active'));
 
             var classes = this.wizard.options.classes;
             if (this.is('active')) {
-                this.$panel.addClass(classes.step.active);
+                this.$pane.addClass(classes.step.active);
             } else {
-                this.$panel.removeClass(classes.step.active);
+                this.$pane.removeClass(classes.step.active);
             }
         },
 
@@ -245,13 +249,13 @@
             this.$element
                 .attr('aria-expanded', true);
 
-            this.$panel
+            this.$pane
                 .addClass(classes.panel.activing)
                 .addClass(classes.panel.active)
                 .attr('aria-expanded', true);
 
             var complete = function() {
-                this.$panel
+                this.$pane
                     .removeClass(classes.panel.activing)
 
                 this.leave('activing');
@@ -266,9 +270,9 @@
                 return complete.call(this);
             }
 
-            this.$panel.one(Support.transition.end, $.proxy(complete, this));
+            this.$pane.one(Support.transition.end, $.proxy(complete, this));
 
-            emulateTransitionEnd(this.$panel, this.TRANSITION_DURATION);
+            emulateTransitionEnd(this.$pane, this.TRANSITION_DURATION);
         },
 
         hide: function(callback) {
@@ -283,13 +287,13 @@
             this.$element
                 .attr('aria-expanded', false);
 
-            this.$panel
+            this.$pane
                 .addClass(classes.panel.activing)
                 .removeClass(classes.panel.active)
                 .attr('aria-expanded', false);
 
             var complete = function() {
-                this.$panel
+                this.$pane
                     .removeClass(classes.panel.activing);
 
                 this.leave('activing');
@@ -304,13 +308,13 @@
                 return complete.call(this);
             }
 
-            this.$panel.one(Support.transition.end, $.proxy(complete, this));
+            this.$pane.one(Support.transition.end, $.proxy(complete, this));
 
-            emulateTransitionEnd(this.$panel, this.TRANSITION_DURATION);
+            emulateTransitionEnd(this.$pane, this.TRANSITION_DURATION);
         },
 
         empty: function() {
-            this.$panel.empty();
+            this.$pane.empty();
         },
 
         load: function(object) {
@@ -320,7 +324,7 @@
             this.enter('loading');
 
             function setContent(content) {
-                self.$panel.html(content);
+                self.$pane.html(content);
 
                 self.wizard.options.loading.hide.call(self.wizard, self);
 
@@ -429,11 +433,11 @@
         },
 
         validate: function() {
-            return this.validator.call(this.$panel.get(0), this);
+            return this.validator.call(this.$pane.get(0), this);
         },
 
-        getPanel: function() {
-            return this.$panel;
+        getPane: function() {
+            return this.$pane;
         }
     });
 
@@ -553,11 +557,11 @@
                 self.updateButton();
 
                 if (self.options.autoFocus) {
-                    var $input = this.$panel.find(':input');
+                    var $input = this.$pane.find(':input');
                     if ($input.length > 0) {
                         $input.eq(0).focus();
                     } else {
-                        this.$panel.focus();
+                        this.$pane.focus();
                     }
                 }
             });

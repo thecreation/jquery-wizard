@@ -109,11 +109,11 @@ $.extend(Wizard.prototype, {
             self.updateButton();
 
             if(self.options.autoFocus){
-                var $input = this.$panel.find(':input');
+                var $input = this.$pane.find(':input');
                 if($input.length > 0) {
                     $input.eq(0).focus();
                 } else {
-                    this.$panel.focus();
+                    this.$pane.focus();
                 }
             }
         });

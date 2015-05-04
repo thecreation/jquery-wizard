@@ -29,7 +29,8 @@ $.extend(Step.prototype, {
     },
 
     setup: function() {
-        if(this.index === this.wizard.currentIndex()){
+        var current = this.wizard.currentIndex();
+        if(this.index === current){
             this.enter('active');
         }
 
@@ -38,9 +39,9 @@ $.extend(Step.prototype, {
 
         var classes = this.wizard.options.classes;
         if(this.is('active')){
-            this.$pane.addClass(classes.step.active);
+            this.$pane.addClass(classes.pane.active);
         } else {
-            this.$pane.removeClass(classes.step.active);
+            this.$pane.removeClass(classes.pane.active);
         }
     },
 
@@ -49,6 +50,7 @@ $.extend(Step.prototype, {
             return;
         }
 
+        this.trigger('beforeShow');
         this.enter('activing');
 
         var classes = this.wizard.options.classes;
@@ -57,16 +59,17 @@ $.extend(Step.prototype, {
             .attr('aria-expanded', true);
 
         this.$pane
-            .addClass(classes.panel.activing)
-            .addClass(classes.panel.active)
+            .addClass(classes.pane.activing)
+            .addClass(classes.pane.active)
             .attr('aria-expanded', true);
 
         var complete = function () {
             this.$pane
-                .removeClass(classes.panel.activing)
+                .removeClass(classes.pane.activing)
 
             this.leave('activing');
-            this.enter('active')
+            this.enter('active');
+            this.trigger('afterShow');
 
             if($.isFunction(callback)){
                 callback.call(this);
@@ -87,6 +90,7 @@ $.extend(Step.prototype, {
             return;
         }
 
+        this.trigger('beforeHide');
         this.enter('activing');
 
         var classes = this.wizard.options.classes;
@@ -95,16 +99,17 @@ $.extend(Step.prototype, {
             .attr('aria-expanded', false);
 
         this.$pane
-            .addClass(classes.panel.activing)
-            .removeClass(classes.panel.active)
+            .addClass(classes.pane.activing)
+            .removeClass(classes.pane.active)
             .attr('aria-expanded', false);
 
         var complete = function () {
             this.$pane
-                .removeClass(classes.panel.activing);
+                .removeClass(classes.pane.activing);
 
             this.leave('activing');
             this.leave('active');
+            this.trigger('afterHide');
 
             if($.isFunction(callback)){
                 callback.call(this);
@@ -128,6 +133,7 @@ $.extend(Step.prototype, {
         var options = object.options;
         var self = this;
 
+        this.trigger('beforeLoad');
         this.enter('loading');
 
         function setContent(content) {
@@ -136,6 +142,7 @@ $.extend(Step.prototype, {
             self.wizard.options.loading.hide.call(self.wizard, self);
 
             self.leave('loading');
+            self.trigger('afterLoad');
         }
 
         if (object.content) {
@@ -204,8 +211,6 @@ $.extend(Step.prototype, {
 
         var classes = this.wizard.options.classes;
         this.$element.addClass(classes.step[state]);
-
-        this.trigger('enter'+capitalizeFirst(state));
     },
 
     /**
@@ -217,8 +222,6 @@ $.extend(Step.prototype, {
 
             var classes = this.wizard.options.classes;
             this.$element.removeClass(classes.step[state]);
-
-            this.trigger('leave'+capitalizeFirst(state));
         }
     },
 

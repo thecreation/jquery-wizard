@@ -131,13 +131,13 @@
             step: {
                 done: 'done',
                 error: 'error',
-                active: 'active',
+                active: 'current',
                 disabled: 'disabled',
                 activing: 'activing',
                 loading: 'loading'
             },
 
-            panel: {
+            pane: {
                 active: 'active',
                 activing: 'activing'
             },
@@ -166,29 +166,22 @@
             fail: function(step) {},
         },
 
-        onReset: null,
-
+        onInit: null,
         onNext: null,
         onBack: null,
+        onReset: null,
 
-        onFirst: null,
-        onLast: null,
+        onBeforeShow: null,
+        onAfterShow: null,
+        onBeforeHide: null,
+        onAfterHide: null,
+        onBeforeLoad: null,
+        onAfterLoad: null,
 
-        onShow: null,
-        onHide: null,
-        onLoad: null,
-        onLoaded: null,
+        onBeforeChange: null,
+        onAfterChange: null,
 
-        onInit: null,
-        onDestroy: null,
-
-        onChanging: null,
-        onChanged: null,
-
-        onFinishing: null,
-        onFinished: null,
-
-        onContentLoaded: null,
+        onFinish: null
     };
 
     // Step
@@ -222,7 +215,8 @@
         },
 
         setup: function() {
-            if (this.index === this.wizard.currentIndex()) {
+            var current = this.wizard.currentIndex();
+            if (this.index === current) {
                 this.enter('active');
             }
 
@@ -231,9 +225,9 @@
 
             var classes = this.wizard.options.classes;
             if (this.is('active')) {
-                this.$pane.addClass(classes.step.active);
+                this.$pane.addClass(classes.pane.active);
             } else {
-                this.$pane.removeClass(classes.step.active);
+                this.$pane.removeClass(classes.pane.active);
             }
         },
 
@@ -242,6 +236,7 @@
                 return;
             }
 
+            this.trigger('beforeShow');
             this.enter('activing');
 
             var classes = this.wizard.options.classes;
@@ -250,16 +245,17 @@
                 .attr('aria-expanded', true);
 
             this.$pane
-                .addClass(classes.panel.activing)
-                .addClass(classes.panel.active)
+                .addClass(classes.pane.activing)
+                .addClass(classes.pane.active)
                 .attr('aria-expanded', true);
 
             var complete = function() {
                 this.$pane
-                    .removeClass(classes.panel.activing)
+                    .removeClass(classes.pane.activing)
 
                 this.leave('activing');
-                this.enter('active')
+                this.enter('active');
+                this.trigger('afterShow');
 
                 if ($.isFunction(callback)) {
                     callback.call(this);
@@ -280,6 +276,7 @@
                 return;
             }
 
+            this.trigger('beforeHide');
             this.enter('activing');
 
             var classes = this.wizard.options.classes;
@@ -288,16 +285,17 @@
                 .attr('aria-expanded', false);
 
             this.$pane
-                .addClass(classes.panel.activing)
-                .removeClass(classes.panel.active)
+                .addClass(classes.pane.activing)
+                .removeClass(classes.pane.active)
                 .attr('aria-expanded', false);
 
             var complete = function() {
                 this.$pane
-                    .removeClass(classes.panel.activing);
+                    .removeClass(classes.pane.activing);
 
                 this.leave('activing');
                 this.leave('active');
+                this.trigger('afterHide');
 
                 if ($.isFunction(callback)) {
                     callback.call(this);
@@ -321,6 +319,7 @@
             var options = object.options;
             var self = this;
 
+            this.trigger('beforeLoad');
             this.enter('loading');
 
             function setContent(content) {
@@ -329,6 +328,7 @@
                 self.wizard.options.loading.hide.call(self.wizard, self);
 
                 self.leave('loading');
+                self.trigger('afterLoad');
             }
 
             if (object.content) {
@@ -397,8 +397,6 @@
 
             var classes = this.wizard.options.classes;
             this.$element.addClass(classes.step[state]);
-
-            this.trigger('enter' + capitalizeFirst(state));
         },
 
         /**
@@ -410,8 +408,6 @@
 
                 var classes = this.wizard.options.classes;
                 this.$element.removeClass(classes.step[state]);
-
-                this.trigger('leave' + capitalizeFirst(state));
             }
         },
 
@@ -463,26 +459,30 @@
             this.$element.on('click', this.options.step, function(e) {
                 var index = $(this).data('wizard-index');
                 self.goTo(index);
+
+                e.preventDefault();
             });
 
             if (this.options.keyboard) {
                 $(document).on('keyup', $.proxy(this.keydown, this));
             }
+
+            this.trigger('init');
         },
 
         setup: function() {
             this.$buttons = $(this.options.templates.buttons.call(this));
 
-            this.updateButton();
+            this.updateButtons();
 
             if (this.options.buttonsAppendTo === 'this') {
-                this.$buttons.appendTo(this.$element);
+                this.$buttons = this.$buttons.appendTo(this.$element);
             } else {
-                this.$buttons.appendTo(this.options.buttonsAppendTo);
+                this.$buttons = this.$buttons.appendTo(this.options.buttonsAppendTo);
             }
         },
 
-        updateButton: function() {
+        updateButtons: function() {
             var classes = this.options.classes.button;
             var $back = this.$buttons.find('[data-wizard="back"]');
             var $next = this.$buttons.find('[data-wizard="next"]');
@@ -501,6 +501,17 @@
                 $next.removeClass(classes.hide);
                 $finish.addClass(classes.hide);
             }
+        },
+
+        updateSteps: function() {
+            var self = this;
+            $.each(this.steps, function(i, step) {
+                if (i > self._current) {
+                    step.leave('error');
+                    step.leave('active');
+                    step.leave('done');
+                }
+            });
         },
 
         keydown: function(e) {
@@ -546,6 +557,8 @@
                 }
             }
 
+            this.trigger('beforeChange');
+
             this.transitioning = true;
             var self = this;
 
@@ -554,7 +567,8 @@
                 self._current = index;
                 self.transitioning = false;
 
-                self.updateButton();
+                self.updateButtons();
+                self.updateSteps();
 
                 if (self.options.autoFocus) {
                     var $input = this.$pane.find(':input');
@@ -564,13 +578,25 @@
                         this.$pane.focus();
                     }
                 }
+
+                self.trigger('afterChange');
             });
         },
 
-        trigger: function(event, index) {
+        trigger: function(eventType) {
             var method_arguments = Array.prototype.slice.call(arguments, 1);
+            var data = [this].concat(method_arguments);
 
-            this.$element.trigger(event);
+            this.$element.trigger('wizard::' + eventType, data);
+
+            // callback
+            eventType = eventType.replace(/\b\w+\b/g, function(word) {
+                return word.substring(0, 1).toUpperCase() + word.substring(1);
+            });
+            var onFunction = 'on' + eventType;
+            if (typeof this.options[onFunction] === 'function') {
+                this.options[onFunction].apply(this, method_arguments);
+            }
         },
 
         length: function() {
@@ -583,6 +609,10 @@
 
         currentIndex: function() {
             return this._current;
+        },
+
+        lastIndex: function() {
+            return this.length() - 1;
         },
 
         next: function() {
@@ -604,7 +634,9 @@
         },
 
         finish: function() {
-            return this.goTo(this.length() - 1);
+            if (this._current === this.lastIndex()) {
+                this.trigger('finish');
+            }
         },
 
         reset: function() {

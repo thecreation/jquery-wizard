@@ -29,13 +29,13 @@ Wizard.defaults = {
         step: {
             done: 'done',
             error: 'error',
-            active: 'active',
+            active: 'current',
             disabled: 'disabled',
             activing: 'activing',
             loading: 'loading'
         },
 
-        panel: {
+        pane: {
             active: 'active',
             activing: 'activing'
         },
@@ -64,27 +64,20 @@ Wizard.defaults = {
         fail: function(step) {},
     },
 
-    onReset: null,
-
+    onInit: null,
     onNext: null,
     onBack: null,
+    onReset: null,
 
-    onFirst: null,
-    onLast: null,
+    onBeforeShow: null,
+    onAfterShow: null,
+    onBeforeHide: null,
+    onAfterHide: null,
+    onBeforeLoad: null,
+    onAfterLoad: null,
 
-    onShow: null,
-    onHide: null,
-    onLoad: null,
-    onLoaded: null,
+    onBeforeChange: null,
+    onAfterChange: null,
 
-    onInit: null,
-    onDestroy: null,
-
-    onChanging: null,
-    onChanged: null,
-
-    onFinishing: null,
-    onFinished: null,
-
-    onContentLoaded: null,
+    onFinish: null
 };

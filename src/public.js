@@ -20,26 +20,30 @@ $.extend(Wizard.prototype, {
         this.$element.on('click', this.options.step, function(e){
             var index = $(this).data('wizard-index');
             self.goTo(index);
+
+            e.preventDefault();
         });
 
         if(this.options.keyboard){
             $(document).on('keyup', $.proxy(this.keydown, this));
         }
+
+        this.trigger('init');
     },
 
     setup: function(){
         this.$buttons = $(this.options.templates.buttons.call(this));
 
-        this.updateButton();
+        this.updateButtons();
 
         if(this.options.buttonsAppendTo ==='this'){
-            this.$buttons.appendTo(this.$element);
+            this.$buttons = this.$buttons.appendTo(this.$element);
         } else {
-            this.$buttons.appendTo(this.options.buttonsAppendTo);
+            this.$buttons = this.$buttons.appendTo(this.options.buttonsAppendTo);
         }
     },
 
-    updateButton: function(){
+    updateButtons: function(){
         var classes = this.options.classes.button;
         var $back = this.$buttons.find('[data-wizard="back"]');
         var $next = this.$buttons.find('[data-wizard="next"]');
@@ -58,6 +62,17 @@ $.extend(Wizard.prototype, {
             $next.removeClass(classes.hide);
             $finish.addClass(classes.hide);
         }
+    },
+
+    updateSteps: function(){
+        var self = this;
+        $.each(this.steps, function(i, step){
+            if(i > self._current){
+                step.leave('error');
+                step.leave('active');
+                step.leave('done');
+            }
+        });
     },
 
     keydown: function(e) {
@@ -98,6 +113,8 @@ $.extend(Wizard.prototype, {
             }
         }
 
+        this.trigger('beforeChange');
+
         this.transitioning = true;
         var self = this;
 
@@ -106,7 +123,8 @@ $.extend(Wizard.prototype, {
             self._current = index;
             self.transitioning = false;
 
-            self.updateButton();
+            self.updateButtons();
+            self.updateSteps();
 
             if(self.options.autoFocus){
                 var $input = this.$pane.find(':input');
@@ -116,13 +134,25 @@ $.extend(Wizard.prototype, {
                     this.$pane.focus();
                 }
             }
+
+            self.trigger('afterChange');
         });
     },
 
-    trigger: function(event, index){
+    trigger: function(eventType){
         var method_arguments = Array.prototype.slice.call(arguments, 1);
+        var data = [this].concat(method_arguments);
 
-        this.$element.trigger(event);
+        this.$element.trigger('wizard::' + eventType, data);
+
+        // callback
+        eventType = eventType.replace(/\b\w+\b/g, function(word) {
+            return word.substring(0, 1).toUpperCase() + word.substring(1);
+        });
+        var onFunction = 'on' + eventType;
+        if (typeof this.options[onFunction] === 'function') {
+            this.options[onFunction].apply(this, method_arguments);
+        }
     },
 
     length: function() {
@@ -135,6 +165,10 @@ $.extend(Wizard.prototype, {
 
     currentIndex: function() {
         return this._current;
+    },
+
+    lastIndex: function(){
+        return this.length() - 1;
     },
 
     next: function() {
@@ -156,7 +190,9 @@ $.extend(Wizard.prototype, {
     },
 
     finish: function() {
-        return this.goTo(this.length() - 1);
+        if(this._current === this.lastIndex()){
+            this.trigger('finish');
+        }
     },
 
     reset: function() {

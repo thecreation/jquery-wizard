@@ -11,10 +11,22 @@
 <meta name="viewport" content="width=device-width">
 
 <link rel="stylesheet" href="../libs/bootstrap/bootstrap.min.css">
-<link rel="stylesheet" href="../css/bootstrap-collapse-wizard.css">   
+<link rel="stylesheet" href="../css/bootstrap-collapse-wizard.css">
 
-
-
+<style>
+.done {
+    color: green !important;
+}
+.current {
+    color: blue !important;
+}
+.error {
+    color: red !important;
+}
+.disabled {
+    cursor: not-allowed;
+}
+</style>
 </head>
 <body>
 <!--[if lt IE 7]>
@@ -35,12 +47,6 @@
         <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
           <div class="panel-body">
             Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-          </div>
-          <div class="panel-footer">
-            <ul class="pager">
-              <li class="previous disabled"><a href="javascript:void(0)">Previous</a></li>
-              <li class="next"><a href="javascript:void(0)">Next</a></li>
-            </ul>
           </div>
         </div>
       </div>
@@ -77,11 +83,48 @@
   </div>
 </div>
 
-
 <script src="../libs/jquery/jquery.js"></script>
 <script src="../libs/bootstrap/bootstrap.min.js"></script>
 <script src="../dist/jquery-wizard.js"></script>
+<script>
+(function(){
+    $('#accordion').wizard({
+        step: '[data-toggle="collapse"]',
 
+        buttonsAppendTo: '.panel-collapse',
+
+        templates: {
+            buttons: function(){
+                var options = this.options;
+                return '<div class="panel-footer"><ul class="pager">' +
+                    '<li class="previous">'+
+                        '<a class="'+options.classes.button.back+'" href="#'+this.id+'" data-wizard="back" role="button">'+options.buttonLabels.back+'</a>' +
+                    '</li>' +
+                    '<li class="next">'+
+                    '<a class="'+options.classes.button.next+'" href="#'+this.id+'" data-wizard="next" role="button">'+options.buttonLabels.next+'</a>' +
+                    '<a class="'+options.classes.button.finish+'" href="#'+this.id+'" data-wizard="finish" role="button">'+options.buttonLabels.finish+'</a>' +
+                    '</li>'+
+                '</ul></div>';
+            }
+        },
+
+        onBeforeShow: function(index){
+            var step = this.get(index);
+            step.$pane.collapse('show');
+        },
+
+        onBeforeHide: function(index){
+            var step = this.get(index);
+            step.$pane.collapse('hide');
+        },
+
+        onFinish: function(){
+            alert('finish');
+        }
+    });
+})();
+
+</script>
 
 </body>
 </html>

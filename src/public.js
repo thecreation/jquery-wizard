@@ -121,18 +121,21 @@ $.extend(Wizard.prototype, {
         var current = this.current();
         var to = this.get(index);
 
-        if(!current.validate()){
-            current.leave('done');
-            current.enter('error');
+        if(index > this._current){
+            if(!current.validate()){
+                current.leave('done');
+                current.enter('error');
 
-            return -1;
-        } else {
-            current.leave('error');
+                return -1;
+            } else {
+                current.leave('error');
 
-            if(index > this._current) {
-                current.enter('done');
+                if(index > this._current) {
+                    current.enter('done');
+                }
             }
         }
+        
 
         var self = this;
         var process = function (){
@@ -240,7 +243,14 @@ $.extend(Wizard.prototype, {
 
     finish: function() {
         if(this._current === this.lastIndex()){
-            this.trigger('finish');
+            var current = this.current();
+            if(current.validate()){
+                this.trigger('finish');
+                current.leave('error');
+                current.enter('done');
+            } else {
+                current.enter('error');
+            }
         }
     },
 

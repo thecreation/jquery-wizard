@@ -1,4 +1,4 @@
-/*! jquery wizard - v0.2.0 - 2015-05-05
+/*! jquery wizard - v0.3.0 - 2015-05-05
  * https://github.com/amazingSurge/jquery-wizard
  * Copyright (c) 2015 amazingSurge; Licensed GPL */
 (function($, document, window, undefined) {
@@ -166,6 +166,10 @@
 
         cacheContent: false,
 
+        validator: function(step) {
+            return true;
+        },
+
         onInit: null,
         onNext: null,
         onBack: null,
@@ -199,9 +203,7 @@
             this.loader = null;
             this.loaded = false;
 
-            this.validator = function() {
-                return true;
-            };
+            this.validator = this.wizard.options.validator;
 
             this.states = {
                 done: false,
@@ -216,6 +218,7 @@
 
             this.$pane = this.wizard.options.getPane.call(this.wizard, index, element);
 
+            this.setValidatorFromData();
             this.setLoaderFromData();
         },
 
@@ -426,6 +429,13 @@
             }
         },
 
+        setValidatorFromData: function() {
+            var validator = this.$pane.data('validator');
+            if (validator && $.isFunction(window[validator])) {
+                this.validator = window[validator];
+            }
+        },
+
         setLoaderFromData: function() {
             var loader = this.$pane.data('loader');
 
@@ -615,18 +625,21 @@
             var current = this.current();
             var to = this.get(index);
 
-            if (!current.validate()) {
-                current.leave('done');
-                current.enter('error');
+            if (index > this._current) {
+                if (!current.validate()) {
+                    current.leave('done');
+                    current.enter('error');
 
-                return -1;
-            } else {
-                current.leave('error');
+                    return -1;
+                } else {
+                    current.leave('error');
 
-                if (index > this._current) {
-                    current.enter('done');
+                    if (index > this._current) {
+                        current.enter('done');
+                    }
                 }
             }
+
 
             var self = this;
             var process = function() {
@@ -736,7 +749,14 @@
 
         finish: function() {
             if (this._current === this.lastIndex()) {
-                this.trigger('finish');
+                var current = this.current();
+                if (current.validate()) {
+                    this.trigger('finish');
+                    current.leave('error');
+                    current.enter('done');
+                } else {
+                    current.enter('error');
+                }
             }
         },
 

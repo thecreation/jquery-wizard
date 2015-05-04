@@ -69,6 +69,10 @@ Wizard.defaults = {
 
     cacheContent: false,
 
+    validator: function(step){
+        return true;
+    },
+
     onInit: null,
     onNext: null,
     onBack: null,

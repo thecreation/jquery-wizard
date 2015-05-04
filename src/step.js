@@ -13,10 +13,8 @@ $.extend(Step.prototype, {
         this.loader = null;
         this.loaded = false;
 
-        this.validator = function(){
-            return true;
-        };
-
+        this.validator = this.wizard.options.validator;
+        
         this.states = {
             done: false,
             error: false,
@@ -30,6 +28,7 @@ $.extend(Step.prototype, {
 
         this.$pane = this.wizard.options.getPane.call(this.wizard, index, element);
 
+        this.setValidatorFromData();
         this.setLoaderFromData();
     },
 
@@ -237,6 +236,13 @@ $.extend(Step.prototype, {
 
             var classes = this.wizard.options.classes;
             this.$element.removeClass(classes.step[state]);
+        }
+    },
+
+    setValidatorFromData: function(){
+        var validator = this.$pane.data('validator');
+        if(validator && $.isFunction(window[validator])){
+            this.validator = window[validator];
         }
     },
 

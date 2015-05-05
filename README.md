@@ -92,6 +92,7 @@ Done!
             }
         },
 
+        // state classes
         classes: {
             step: {
                 done: 'done',

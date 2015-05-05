@@ -1,5 +1,5 @@
 {
-  "name": "jquery-wizard",
+  "name": "jquery-wizard.js",
   "version": "0.3.0",
   "description": "jquery wizard is a lightweight jquery plugin for wizard contents.",
   "main": "dist/jquery-wizard.js",

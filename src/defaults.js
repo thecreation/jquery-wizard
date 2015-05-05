@@ -2,19 +2,7 @@ Wizard.defaults = {
     step: '.wizard-steps > li',
 
     getPane: function(index, step){
-        var $step = $(step);
-        var selector = $step.data('target');
-
-        if (!selector) {
-            selector = $step.attr('href');
-            selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '');
-        }
-
-        if(selector) {
-            return $(selector);
-        } else {
-            return this.$element.find('.wizard-content').children().eq(index);
-        }
+        return this.$element.find('.wizard-content').children().eq(index);
     },
 
     buttonsAppendTo: 'this',
@@ -87,6 +75,8 @@ Wizard.defaults = {
 
     onBeforeChange: null,
     onAfterChange: null,
+
+    onStateChange: null,
 
     onFinish: null
 };

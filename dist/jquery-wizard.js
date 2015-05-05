@@ -98,19 +98,7 @@
         step: '.wizard-steps > li',
 
         getPane: function(index, step) {
-            var $step = $(step);
-            var selector = $step.data('target');
-
-            if (!selector) {
-                selector = $step.attr('href');
-                selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '');
-            }
-
-            if (selector) {
-                return $(selector);
-            } else {
-                return this.$element.find('.wizard-content').children().eq(index);
-            }
+            return this.$element.find('.wizard-content').children().eq(index);
         },
 
         buttonsAppendTo: 'this',
@@ -158,14 +146,14 @@
         },
 
         loading: {
-            show: function() {},
-            hide: function() {},
-            fail: function() {}
+            show: function(step) {},
+            hide: function(step) {},
+            fail: function(step) {}
         },
 
         cacheContent: false,
 
-        validator: function() {
+        validator: function(step) {
             return true;
         },
 
@@ -183,6 +171,8 @@
 
         onBeforeChange: null,
         onAfterChange: null,
+
+        onStateChange: null,
 
         onFinish: null
     };
@@ -215,10 +205,30 @@
             this.index = index;
             this.$element.data('wizard-index', index);
 
-            this.$pane = this.wizard.options.getPane.call(this.wizard, index, element);
+
+            this.$pane = this.getPaneFromTarget();
+
+            if (!this.$pane) {
+                this.$pane = this.wizard.options.getPane.call(this.wizard, index, element);
+            }
 
             this.setValidatorFromData();
             this.setLoaderFromData();
+        },
+
+        getPaneFromTarget: function() {
+            var selector = this.$element.data('target');
+
+            if (!selector) {
+                selector = this.$element.attr('href');
+                selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '');
+            }
+
+            if (selector) {
+                return $(selector);
+            } else {
+                return null;
+            }
         },
 
         setup: function() {
@@ -392,6 +402,8 @@
 
             var classes = this.wizard.options.classes;
             this.$element.addClass(classes.step[state]);
+
+            this.trigger('stateChange', true, state);
         },
 
         leave: function(state) {
@@ -400,6 +412,8 @@
 
                 var classes = this.wizard.options.classes;
                 this.$element.removeClass(classes.step[state]);
+
+                this.trigger('stateChange', false, state);
             }
         },
 

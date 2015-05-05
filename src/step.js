@@ -26,10 +26,30 @@ $.extend(Step.prototype, {
         this.index = index;
         this.$element.data('wizard-index', index);
 
-        this.$pane = this.wizard.options.getPane.call(this.wizard, index, element);
+
+        this.$pane = this.getPaneFromTarget();
+
+        if(!this.$pane){
+            this.$pane = this.wizard.options.getPane.call(this.wizard, index, element);
+        }
 
         this.setValidatorFromData();
         this.setLoaderFromData();
+    },
+
+    getPaneFromTarget: function(){
+        var selector = this.$element.data('target');
+
+        if (!selector) {
+            selector = this.$element.attr('href');
+            selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '');
+        }
+
+        if(selector) {
+            return $(selector);
+        } else {
+            return null;
+        }
     },
 
     setup: function() {
@@ -203,6 +223,8 @@ $.extend(Step.prototype, {
 
         var classes = this.wizard.options.classes;
         this.$element.addClass(classes.step[state]);
+
+        this.trigger('stateChange', true, state);
     },
 
     leave: function(state) {
@@ -211,6 +233,8 @@ $.extend(Step.prototype, {
 
             var classes = this.wizard.options.classes;
             this.$element.removeClass(classes.step[state]);
+
+            this.trigger('stateChange', false, state);
         }
     },
 

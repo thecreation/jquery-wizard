@@ -29,6 +29,11 @@
 <script src="../libs/formvalidation/formValidation.min.js"></script>
 <script src="../libs/formvalidation/bootstrap.min.js"></script>
 
+<style>
+section {
+    margin: 60px;
+}
+</style>
 </head>
 <body>
 <!--[if lt IE 7]>
@@ -144,7 +149,7 @@
     <section>
         <h3>Validator</h3>
         <p>This example using <a href="http://formvalidation.io/api/#validate-container">FormValidation</a> Plugin. You can also code your own validate function or using another form validation plugin.</p>
-        
+
         <div id="exampleValidator" class="wizard">
             <ul class="wizard-steps" role="tablist">
                 <li class="active" role="tab">
@@ -235,9 +240,9 @@
         },
         validator: function(){
             var fv = $('#validation').data('formValidation');
-                
+
             var $this = $(this);
-            
+
             // Validate the container
             fv.validateContainer($this);
 
@@ -260,7 +265,7 @@
     <section>
         <h3>SetValidator</h3>
         <p>You can set validator for step respectively.</p>
-        
+
         <div id="exampleSetValidator" class="wizard">
             <ul class="wizard-steps" role="tablist">
                 <li data-target="#form1" class="active" role="tab">
@@ -314,7 +319,7 @@
             return false;
         }
     });
-    
+
     wizard.get('#form3').setValidator(function(){
         if($(this).find('[name="c"]').val() === 'c'){
             return true;
@@ -328,7 +333,7 @@
 
     <section>
         <h3>SetValidator using Data Attr</h3>
-        
+
         <div id="exampleSetValidatorAttr" class="wizard">
             <ul class="wizard-steps" role="tablist">
                 <li class="active" role="tab">
@@ -435,7 +440,7 @@
             dataType: 'html'
         }
     });
-    
+
     // We can using callback process the ajax object. It will be called when we load the content.
     wizard.get('#loader3').setLoader(function(){
         return {
@@ -562,6 +567,53 @@
         },
         onFinish: function(){
             console.info('finish');
+            alert('finish');
+        }
+    });
+})();
+</script>
+    </section>
+
+    <section>
+        <h3>StateChange Event</h3>
+        <div id="exampleStateChange" class="wizard">
+            <ul class="wizard-steps" role="tablist">
+                <li class="active" role="tab">
+                    Step 1
+                </li>
+                <li role="tab">
+                    Step 2
+                </li>
+                <li role="tab">
+                    Step 3
+                </li>
+            </ul>
+            <div class="wizard-content">
+                <div class="wizard-pane active" data-validator="validateCallbackA" role="tabpanel">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Please input 'a'" name="a" />
+                    </div>
+                </div>
+                <div class="wizard-pane" role="tabpanel">Step 2 Content</div>
+                <div class="wizard-pane" role="tabpanel">Step 3 Content</div>
+            </div>
+        </div>
+<script type="text/javascript">
+(function(){
+    $('#exampleStateChange').wizard({
+        onStateChange: function(step, enter, state){
+            switch(state){
+                case 'error':
+                    if(enter){
+                        alert('Get a error on step ' + step.index);
+                    } else {
+                        alert('Resolved the error');
+                    }
+                break;
+            }
+        },
+
+        onFinish: function(){
             alert('finish');
         }
     });

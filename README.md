@@ -1,6 +1,6 @@
 #[jquery-wizard](https://github.com/amazingSurge/jquery-wizard) ![bower][bower-image] [![devDependency status][devdeps-image]][devdeps-link]
 
-`jquery-wizard` is a lightweight jquery plugin for creating wizard contents.
+`jquery-wizard` is a lightweight jquery plugin for creating step-by-step wizards.
 
 ##Getting jquery-wizard
 
@@ -152,7 +152,7 @@ Done!
         onBeforeChange: function(from, to){},
         onAfterChange: function(from, to){},
 
-        onStateChange: function(step, enter, state){}
+        onStateChange: function(step, enter, state){},
 
         onFinish: function(){}
     });
@@ -171,7 +171,6 @@ review the [guidelines for contributing](CONTRIBUTING.md). Make sure you're usin
 Copyright (C) 2015 amazingSurge Ltd.
 
 Licensed under [the GPL license](LICENSE-GPL).
-
 
 [bower-image]: https://img.shields.io/bower/v/jquery-wizard.js.svg?style=flat
 [bower-link]: https://david-dm.org/amazingsurge/jquery-wizard.js/dev-status.svg

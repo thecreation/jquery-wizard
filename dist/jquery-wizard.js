@@ -1,4 +1,4 @@
-/*! jQuery wizard - v0.3.0 - 2015-05-07
+/*! jQuery wizard - v0.3.1 - 2015-05-07
  * https://github.com/amazingSurge/jquery-wizard
  * Copyright (c) 2015 amazingSurge; Licensed GPL */
 (function($, document, window, undefined) {

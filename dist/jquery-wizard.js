@@ -561,7 +561,7 @@
             } else {
                 $to = this.$element.find(buttonsAppendTo);
             }
-            this.$buttons.appendTo($to);
+            this.$buttons = this.$buttons.appendTo($to);
         },
 
         updateButtons: function() {

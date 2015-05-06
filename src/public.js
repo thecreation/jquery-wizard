@@ -40,11 +40,16 @@ $.extend(Wizard.prototype, {
 
         this.updateButtons();
 
-        if(this.options.buttonsAppendTo ==='this'){
-            this.$buttons = this.$buttons.appendTo(this.$element);
+        var buttonsAppendTo = this.options.buttonsAppendTo;
+        var $to;
+        if(buttonsAppendTo ==='this'){
+            $to = this.$element;
+        } else if($.isFunction(buttonsAppendTo)){
+            $to = buttonsAppendTo.call(this);
         } else {
-            this.$buttons = this.$buttons.appendTo(this.options.buttonsAppendTo);
+            $to = this.$element.find(buttonsAppendTo);
         }
+        this.$buttons.appendTo($to);
     },
 
     updateButtons: function(){

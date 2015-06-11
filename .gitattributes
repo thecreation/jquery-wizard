@@ -7,3 +7,4 @@
 *.md    text eol=lf
 *.svg   text eol=lf
 *.yml   text eol=lf
+demo/* linguist-documentation

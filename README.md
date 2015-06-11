@@ -169,12 +169,12 @@ review the [guidelines for contributing](CONTRIBUTING.md). Make sure you're usin
 
 ## Copyright and license
 
-Copyright (C) 2015 amazingSurge Ltd.
+Copyright (C) 2015 amazingSurge.
 
 Licensed under [the GPL license](LICENSE-GPL).
 
 [bower-image]: https://img.shields.io/bower/v/jquery-wizard.js.svg?style=flat
-[bower-link]: https://david-dm.org/amazingsurge/jquery-wizard.js/dev-status.svg
+[bower-link]: https://david-dm.org/amazingSurge/jquery-wizard.js/dev-status.svg
 
-[devdeps-image]: https://img.shields.io/david/dev/amazingsurge/jquery-wizard.svg?style=flat
-[devdeps-link]: https://david-dm.org/amazingsurge/jquery-wizard#info=devDependencies
+[devdeps-image]: https://img.shields.io/david/dev/amazingSurge/jquery-wizard.svg?style=flat
+[devdeps-link]: https://david-dm.org/amazingSurge/jquery-wizard#info=devDependencies

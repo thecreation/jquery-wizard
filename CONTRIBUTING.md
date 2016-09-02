@@ -36,7 +36,7 @@ Guidelines for bug reports:
    latest `master` or development branch in the repository.
 
 3. **Provide environment details.** Provide your operating system, browser(s),
-   devices, and breakpoints.js version.
+   devices, and jquery-asScrollbar version.
 
 4. **Create an isolated and reproducible test case.** Create a [reduced test
    case](http://css-tricks.com/6263-reduced-test-cases/).
@@ -91,22 +91,28 @@ code as deemed necessary.
   a branch or fork.
 * Non-trivial changes should be discussed in an issue first
 * If your change affects the distributed files, re-generate them using the
-  [grunt procedure](#using-grunt)
+  [gulp procedure](#using-gulp)
 * If possible, add relevant tests to cover the change
 * Write a convincing description of your PR and why we should land it
 
-## Using Grunt
+## Using Gulp
 
-We are using node and grunt to build and (in the future) test this project.
-This means that you must setup a local development environment:
+We are using node, gulp and babel to build and (in the future) test this project. This means that you must setup a local development environment:
 
 1. Install `node` and `npm` using your preferred method
-2. Install the grunt CLI: `npm install -g grunt-cli`
-3. Install the project's development dependencies: `npm install`
-4. Run the various grunt tasks as needed:
-   - `grunt`: clean the distribution files and re-build them
-   - `grunt dist`: build the distribution files
-   - `grunt clean`: clean the distribution files
-   - `grunt dist`: build the javascript distribution files
-   - `grunt watch`: watch for changes in the source files and build the
-     distribution files as needed
+2. Install the gulp CLI: `npm install -g gulp-cli`
+3. Install the Babel CLI: `npm install -g babel-cli`
+4. Install the project's development dependencies: `npm install`
+
+#### Available Tasks
+- `gulp` or `gulp watch` Start watch for changes and server with Browsersync.
+- `gulp build` Run all development tasks
+- `gulp serve` Start server with Browsersync.
+- `gulp clean` Clean output directories.
+- `gulp bundler` Bundle javasript modules.
+- `gulp scripts` Concatenate and minify JavaScript.
+- `gulp lint:es` Lint ES6 files using eslint.
+- `gulp lint:js` Lint Javascript files using jshint.
+- `gulp clean` Clean out distribution javascript files.
+- `gulp tdd` Test for Test Driven Development purposes.
+- `gulp test` Test for Continuous Integration purposes.

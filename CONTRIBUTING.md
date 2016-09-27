@@ -36,7 +36,7 @@ Guidelines for bug reports:
    latest `master` or development branch in the repository.
 
 3. **Provide environment details.** Provide your operating system, browser(s),
-   devices, and jquery-asScrollbar version.
+   devices, and jquery-wizard version.
 
 4. **Create an isolated and reproducible test case.** Create a [reduced test
    case](http://css-tricks.com/6263-reduced-test-cases/).
@@ -76,26 +76,90 @@ fits with the scope and aims of the project. It's up to *you* to make a strong
 case to convince the project's developers of the merits of this feature. Please
 provide as much detail and context as possible.
 
-## Pull Request Guidelines
 
-You must understand that by contributing code to this project, you are granting
-the authors (and/or leaders) of the project a non-exclusive license to
-re-distribute your code under the current license and possibly re-license the
-code as deemed necessary.
+## Pull Requests
 
-* To instantiate a context or use it, use the variable **that** instead of
-  **_this**.
-* Please check to make sure that there aren't existing pull requests attempting
-  to address the issue mentioned. We also recommend checking for issues related
-  to the issue on the tracker, as a team member may be working on the issue in
-  a branch or fork.
-* Non-trivial changes should be discussed in an issue first
-* If your change affects the distributed files, re-generate them using the
-  [gulp procedure](#using-gulp)
-* If possible, add relevant tests to cover the change
-* Write a convincing description of your PR and why we should land it
+**Working on your first Pull Request?** You can learn how from this *free* series [How to Contribute to an Open Source Project on GitHub](https://egghead.io/series/how-to-contribute-to-an-open-source-project-on-github)
 
-## Using Gulp
+Good pull requests - patches, improvements, new features - are a fantastic
+help. They should remain focused in scope and avoid containing unrelated
+commits.
+
+**Please ask first** before embarking on any significant pull request (e.g.
+implementing features, refactoring code, porting to a different language),
+otherwise you risk spending a lot of time working on something that the
+project's developers might not want to merge into the project.
+
+Please adhere to the coding conventions used throughout a project (indentation,
+accurate comments, etc.) and any other requirements (such as test coverage).
+
+Follow this process if you'd like your work considered for inclusion in the
+project:
+
+1. [Fork](http://help.github.com/fork-a-repo/) the project, clone your fork,
+   and configure the remotes:
+
+   ```bash
+   # Clone your fork of the repo into the current directory
+   git clone https://github.com/<your-username>/<repo-name>
+   # Navigate to the newly cloned directory
+   cd <repo-name>
+   # Assign the original repo to a remote called "upstream"
+   git remote add upstream https://github.com/<upstream-owner>/<repo-name>
+   ```
+
+2. If you cloned a while ago, get the latest changes from upstream:
+
+   ```bash
+   git checkout <dev-branch>
+   git pull upstream <dev-branch>
+   ```
+
+3. Create a new topic branch (off the main project development branch) to
+   contain your feature, change, or fix:
+
+   ```bash
+   git checkout -b <topic-branch-name>
+   ```
+
+4. Commit your changes in logical chunks. Please adhere to these [git commit
+   message guidelines](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)
+   or your code is unlikely be merged into the main project. Use Git's
+   [interactive rebase](https://help.github.com/articles/interactive-rebase)
+   feature to tidy up your commits before making them public.
+
+5. Locally merge (or rebase) the upstream development branch into your topic branch:
+
+   ```bash
+   git pull [--rebase] upstream <dev-branch>
+   ```
+
+6. Push your topic branch up to your fork:
+
+   ```bash
+   git push origin <topic-branch-name>
+   ```
+
+7. [Open a Pull Request](https://help.github.com/articles/using-pull-requests/)
+    with a clear title and description.
+
+**IMPORTANT**: By submitting a patch, you agree to allow the project owner to
+license your work under the same license as that used by the project.
+
+
+## Code Consitency
+
+To help create consistent looking code throughout the project, we use a few tools to help us. 
+
+#### ESlint
+We use [ESlint](http://eslint.org) on each build to find easy-to-catch errors and potential problems in our js.  You can find our ESlint settings in the `.eslintrc.yml` file in the root of the project.
+
+#### EditorConfig
+
+We use [EditorConfig](http://EditorConfig.org) to maintain consistent coding styles between various editors and IDEs.  You can find our settings in the `.editorconfig` file in the root of the project.
+
+
+## Development
 
 We are using node, gulp and babel to build and (in the future) test this project. This means that you must setup a local development environment:
 
@@ -110,7 +174,7 @@ We are using node, gulp and babel to build and (in the future) test this project
 - `gulp serve` Start server with Browsersync.
 - `gulp clean` Clean output directories.
 - `gulp bundler` Bundle javasript modules.
-- `gulp scripts` Concatenate and minify JavaScript.
+- `gulp scripts` Concatenate and minify JavaScript to `dist`.
 - `gulp lint:es` Lint ES6 files using eslint.
 - `gulp lint:js` Lint Javascript files using jshint.
 - `gulp clean` Clean out distribution javascript files.

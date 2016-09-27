@@ -1,6 +1,6 @@
 import Support from './support';
 
-export default ($el, duration) => {
+export function emulateTransitionEnd ($el, duration) {
     'use strict';
   let called = false;
 

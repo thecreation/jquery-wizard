@@ -17,6 +17,7 @@ import plumber      from 'gulp-plumber';
 import beautify     from '../util/beautify';
 import path         from 'path';
 import notify       from 'gulp-notify';
+import replace      from 'gulp-replace';
 
 export function bundler(src = config.scripts.src, dest = config.scripts.dest, entry = config.scripts.entry, files = config.scripts.files, message = 'Bundler task complete') {
   return function () {
@@ -26,11 +27,14 @@ export function bundler(src = config.scripts.src, dest = config.scripts.dest, en
       .on('error', handleErrors)
       .pipe(plumber({errorHandler: handleErrors}))
       .pipe(rollup({
-        allowRealFiles: true,
-        entry: `${src}/${entry}`
+        entry: `${src}/${entry}`,
+        globals: {
+          jquery: 'jQuery'
+        }
       }))
       .pipe(header(config.banner))
       .pipe(rename({
+        basename: config.name,
         suffix: '.es'
       }))
       .pipe(gulp.dest(dest))
@@ -48,19 +52,28 @@ export function scripts(src = config.scripts.src, dest = config.scripts.dest, en
   return function () {
     let srcFiles = getSrcFiles(src, files);
 
-    return gulp.src(srcFiles)
+    return gulp.src(`${dest}/${config.name}.es.js`)
       .on('error', handleErrors)
       .pipe(plumber({errorHandler: handleErrors}))
-      .pipe(rollup({
-        allowRealFiles: true,
-        entry: `${src}/${entry}`
-      }))
+      // .pipe(rollup({
+      //   entry: `${src}/${entry}`
+      // }))
       .pipe(babel({
-        plugins: ['transform-es2015-modules-umd']
+        "presets": ["es2015"],
+        "plugins": [
+          ["transform-es2015-modules-umd", {
+            "globals": {
+              "jquery": "jQuery"
+            }
+          }]
+        ]
       }))
       .pipe(header(config.banner))
       .pipe(beautify({
         config: path.join(config.paths.root, '.beautifyrc')
+      }))
+      .pipe(rename({
+        basename: config.name
       }))
       .pipe(gulp.dest(dest))
       .pipe(size({
@@ -89,4 +102,12 @@ export function scripts(src = config.scripts.src, dest = config.scripts.dest, en
         onLast: true
       }));
   };
+}
+
+export function version(src = config.scripts.src, file = config.scripts.version) {
+  return function() {
+    return gulp.src(path.join(src, file), {base: "./"})
+      .pipe(replace(/("{0,1}|'{0,1})version\1\s*:\s*("|')([\d.]+)\2/, `$1version$1:$2${config.version}$2`))
+      .pipe(gulp.dest("./", {overwrite: true}));
+  }
 }

@@ -20,7 +20,7 @@ import getSrcFiles  from '../util/getSrcFiles';
 
 export default function (src = config.styles.src, dest = config.styles.dest, files = config.styles.files, message = 'Styles task complete') {
   const createSourcemap = config.deploy || config.styles.prodSourcemap;
-  console.log("run")
+
   return function() {
     let srcFiles = getSrcFiles(src, files);
 

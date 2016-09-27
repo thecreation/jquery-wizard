@@ -1,33 +1,28 @@
 /**
-* jQuery wizard
-* jquery wizard is a lightweight jquery plugin for creating step-by-step wizards.
-* Compiled: Fri Sep 02 2016 11:59:56 GMT+0800 (CST)
-* @version v0.3.1
-* @link https://github.com/amazingSurge/jquery-wizard
-* @copyright LGPL-3.0
+* jQuery wizard v0.4.0
+* https://github.com/amazingSurge/jquery-wizard
+*
+* Copyright (c) amazingSurge
+* Released under the LGPL-3.0 license
 */
 (function(global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(['exports', 'jQuery'], factory);
+    define(['jquery'], factory);
   } else if (typeof exports !== "undefined") {
-    factory(exports, require('jQuery'));
+    factory(require('jquery'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports, global.jQuery);
-    global.jqueryWizard = mod.exports;
+    factory(global.jQuery);
+    global.jqueryWizardEs = mod.exports;
   }
 })(this,
 
-  function(exports, _jQuery) {
+  function(_jquery) {
     'use strict';
 
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-
-    var _jQuery2 = _interopRequireDefault(_jQuery);
+    var _jquery2 = _interopRequireDefault(_jquery);
 
     function _interopRequireDefault(obj) {
       return obj && obj.__esModule ? obj : {
@@ -90,13 +85,14 @@
       };
     }();
 
-    var defaults = {
+    /*eslint no-unused-vars: "off"*/
+    /*eslint no-empty-function: "off"*/
+    var DEFAULTS = {
       step: '.wizard-steps > li',
 
       getPane: function getPane(index, step) {
         return this.$element.find('.wizard-content').children().eq(index);
       },
-
 
       buttonsAppendTo: 'this',
       templates: {
@@ -151,7 +147,6 @@
         return true;
       },
 
-
       onInit: null,
       onNext: null,
       onBack: null,
@@ -172,7 +167,15 @@
       onFinish: null
     };
 
-    var Support = function() {
+    /**
+     * Css features detect
+     **/
+    var support = {};
+
+    (function(support) {
+      /**
+       * Borrowed from Owl carousel
+       **/
       var events = {
           transition: {
             end: {
@@ -181,26 +184,37 @@
               OTransition: 'oTransitionEnd',
               transition: 'transitionend'
             }
+          },
+          animation: {
+            end: {
+              WebkitAnimation: 'webkitAnimationEnd',
+              MozAnimation: 'animationend',
+              OAnimation: 'oAnimationEnd',
+              animation: 'animationend'
+            }
           }
         },
         prefixes = ['webkit', 'Moz', 'O', 'ms'],
-        style = (0, _jQuery2.default)('<support>').get(0).style,
+        style = (0, _jquery2.default)('<support>').get(0).style,
         tests = {
           csstransitions: function csstransitions() {
             return Boolean(test('transition'));
+          },
+          cssanimations: function cssanimations() {
+            return Boolean(test('animation'));
           }
         };
 
-      function test(property, prefixed) {
-        var result = false;
-        var upper = property.charAt(0).toUpperCase() + property.slice(1);
+      var test = function test(property, prefixed) {
+        var result = false,
+          upper = property.charAt(0).toUpperCase() + property.slice(1);
 
         if (style[property] !== undefined) {
           result = property;
         }
 
         if (!result) {
-          _jQuery2.default.each(prefixes,
+          _jquery2.default.each(prefixes,
 
             function(i, prefix) {
               if (style[prefix + upper] !== undefined) {
@@ -208,6 +222,8 @@
 
                 return false;
               }
+
+              return true;
             }
           );
         }
@@ -223,27 +239,31 @@
         }
 
         return false;
-      }
+      };
 
-      function prefixed(property) {
+      var prefixed = function prefixed(property) {
         return test(property, true);
-      }
-
-      var support = {};
+      };
 
       if (tests.csstransitions()) {
-        /* jshint -W053 */
+        /*eslint no-new-wrappers: "off"*/
         support.transition = new String(prefixed('transition'));
         support.transition.end = events.transition.end[support.transition];
       }
 
-      return support;
-    }();
+      if (tests.cssanimations()) {
+        /*eslint no-new-wrappers: "off"*/
+        support.animation = new String(prefixed('animation'));
+        support.animation.end = events.animation.end[support.animation];
+      }
+    })(support);
 
-    var emulateTransitionEnd = function emulateTransitionEnd($el, duration) {
+    function emulateTransitionEnd($el, duration) {
+      'use strict';
+
       var called = false;
 
-      $el.one(Support.transition.end,
+      $el.one(support.transition.end,
 
         function() {
           called = true;
@@ -251,11 +271,11 @@
       );
       var callback = function callback() {
         if (!called) {
-          $el.trigger(Support.transition.end);
+          $el.trigger(support.transition.end);
         }
       };
       setTimeout(callback, duration);
-    };
+    }
 
     var Step = function() {
       function Step(element, wizard, index) {
@@ -269,7 +289,7 @@
       _createClass(Step, [{
         key: 'initialize',
         value: function initialize(element, wizard, index) {
-          this.$element = $(element);
+          this.$element = (0, _jquery2.default)(element);
           this.wizard = wizard;
 
           this.events = {};
@@ -310,11 +330,10 @@
 
           if (selector) {
 
-            return $(selector);
-          } else {
-
-            return null;
+            return (0, _jquery2.default)(selector);
           }
+
+          return null;
         }
       }, {
         key: 'setup',
@@ -366,17 +385,18 @@
             this.enter('active');
             this.trigger('afterShow');
 
-            if ($.isFunction(callback)) {
+            if (_jquery2.default.isFunction(callback)) {
               callback.call(this);
             }
           };
 
-          if (!Support.transition) {
+          if (!support.transition) {
+            complete.call(this);
 
-            return complete.call(this);
+            return;
           }
 
-          this.$pane.one(Support.transition.end, $.proxy(complete, this));
+          this.$pane.one(support.transition.end, _jquery2.default.proxy(complete, this));
 
           emulateTransitionEnd(this.$pane, this.TRANSITION_DURATION);
         }
@@ -404,17 +424,18 @@
             this.leave('active');
             this.trigger('afterHide');
 
-            if ($.isFunction(callback)) {
+            if (_jquery2.default.isFunction(callback)) {
               callback.call(this);
             }
           };
 
-          if (!Support.transition) {
+          if (!support.transition) {
+            complete.call(this);
 
-            return complete.call(this);
+            return;
           }
 
-          this.$pane.one(Support.transition.end, $.proxy(complete, this));
+          this.$pane.one(support.transition.end, _jquery2.default.proxy(complete, this));
 
           emulateTransitionEnd(this.$pane, this.TRANSITION_DURATION);
         }
@@ -426,53 +447,53 @@
       }, {
         key: 'load',
         value: function load(callback) {
-          var self = this;
+          var that = this;
           var loader = this.loader;
 
-          if ($.isFunction(loader)) {
+          if (_jquery2.default.isFunction(loader)) {
             loader = loader.call(this.wizard, this);
           }
 
           if (this.wizard.options.cacheContent && this.loaded) {
 
-            if ($.isFunction(callback)) {
+            if (_jquery2.default.isFunction(callback)) {
               callback.call(this);
             }
 
-            return true;
+            return;
           }
 
           this.trigger('beforeLoad');
           this.enter('loading');
 
           function setContent(content) {
-            self.$pane.html(content);
+            that.$pane.html(content);
 
-            self.leave('loading');
-            self.loaded = true;
-            self.trigger('afterLoad');
+            that.leave('loading');
+            that.loaded = true;
+            that.trigger('afterLoad');
 
-            if ($.isFunction(callback)) {
-              callback.call(self);
+            if (_jquery2.default.isFunction(callback)) {
+              callback.call(that);
             }
           }
 
           if (typeof loader === 'string') {
             setContent(loader);
           } else if ((typeof loader === 'undefined' ? 'undefined' : _typeof(loader)) === 'object' && loader.hasOwnProperty('url')) {
-            self.wizard.options.loading.show.call(self.wizard, self);
+            that.wizard.options.loading.show.call(that.wizard, that);
 
-            $.ajax(loader.url, loader.settings || {}).done(
+            _jquery2.default.ajax(loader.url, loader.settings || {}).done(
 
               function(data) {
                 setContent(data);
 
-                self.wizard.options.loading.hide.call(self.wizard, self);
+                that.wizard.options.loading.hide.call(that.wizard, that);
               }
             ).fail(
 
               function() {
-                self.wizard.options.loading.fail.call(self.wizard, self);
+                that.wizard.options.loading.fail.call(that.wizard, that);
               }
             );
           } else {
@@ -488,7 +509,7 @@
             args[_key - 1] = arguments[_key];
           }
 
-          if ($.isArray(this.events[event])) {
+          if (_jquery2.default.isArray(this.events[event])) {
 
             for (var i in this.events[event]) {
 
@@ -529,7 +550,7 @@
         value: function setValidatorFromData() {
           var validator = this.$pane.data('validator');
 
-          if (validator && $.isFunction(window[validator])) {
+          if (validator && _jquery2.default.isFunction(window[validator])) {
             this.validator = window[validator];
           }
         }
@@ -540,7 +561,7 @@
 
           if (loader) {
 
-            if ($.isFunction(window[loader])) {
+            if (_jquery2.default.isFunction(window[loader])) {
               this.loader = window[loader];
             }
           } else {
@@ -562,9 +583,9 @@
       }, {
         key: 'on',
         value: function on(event, handler) {
-          if ($.isFunction(handler)) {
+          if (_jquery2.default.isFunction(handler)) {
 
-            if ($.isArray(this.events[event])) {
+            if (_jquery2.default.isArray(this.events[event])) {
               this.events[event].push(handler);
             } else {
               this.events[event] = [handler];
@@ -576,10 +597,12 @@
       }, {
         key: 'off',
         value: function off(event, handler) {
-          if ($.isFunction(handler) && $.isArray(this.events[event])) {
-            $.each(this.events[event],
+          if (_jquery2.default.isFunction(handler) && _jquery2.default.isArray(this.events[event])) {
+            _jquery2.default.each(this.events[event],
 
               function(i, f) {
+                /*eslint consistent-return: "off"*/
+
                 if (f === handler) {
                   delete this.events[event][i];
 
@@ -623,7 +646,7 @@
       }, {
         key: 'setValidator',
         value: function setValidator(validator) {
-          if ($.isFunction(validator)) {
+          if (_jquery2.default.isFunction(validator)) {
             this.validator = validator;
           }
 
@@ -640,15 +663,15 @@
     }();
 
     var counter = 0;
-    var NAME = 'wizard';
+    var NAMESPACE$1 = 'wizard';
 
     var wizard = function() {
       function wizard(element, options) {
         _classCallCheck(this, wizard);
 
-        this.$element = (0, _jQuery2.default)(element);
+        this.$element = (0, _jquery2.default)(element);
 
-        this.options = _jQuery2.default.extend(true, {}, defaults, options);
+        this.options = _jquery2.default.extend(true, {}, DEFAULTS, options);
 
         this.$steps = this.$element.find(this.options.step);
 
@@ -659,6 +682,8 @@
           this.$element.attr('id', this.id);
         }
 
+        this.trigger('init');
+
         this.initialize();
       }
 
@@ -666,19 +691,19 @@
         key: 'initialize',
         value: function initialize() {
           this.steps = [];
-          var self = this;
+          var that = this;
 
           this.$steps.each(
 
             function(index) {
-              self.steps.push(new Step(this, self, index));
+              that.steps.push(new Step(this, that, index));
             }
           );
 
           this._current = 0;
           this.transitioning = null;
 
-          _jQuery2.default.each(this.steps,
+          _jquery2.default.each(this.steps,
 
             function(i, step) {
               step.setup();
@@ -690,10 +715,10 @@
           this.$element.on('click', this.options.step,
 
             function(e) {
-              var index = (0, _jQuery2.default)(this).data('wizard-index');
+              var index = (0, _jquery2.default)(this).data('wizard-index');
 
-              if (!self.get(index).is('disabled')) {
-                self.goTo(index);
+              if (!that.get(index).is('disabled')) {
+                that.goTo(index);
               }
 
               e.preventDefault();
@@ -702,15 +727,15 @@
           );
 
           if (this.options.keyboard) {
-            (0, _jQuery2.default)(document).on('keyup', _jQuery2.default.proxy(this.keydown, this));
+            (0, _jquery2.default)(document).on('keyup', _jquery2.default.proxy(this.keydown, this));
           }
 
-          this.trigger('init');
+          this.trigger('ready');
         }
       }, {
         key: 'setup',
         value: function setup() {
-          this.$buttons = (0, _jQuery2.default)(this.options.templates.buttons.call(this));
+          this.$buttons = (0, _jquery2.default)(this.options.templates.buttons.call(this));
 
           this.updateButtons();
 
@@ -719,7 +744,7 @@
 
           if (buttonsAppendTo === 'this') {
             $to = this.$element;
-          } else if (_jQuery2.default.isFunction(buttonsAppendTo)) {
+          } else if (_jquery2.default.isFunction(buttonsAppendTo)) {
             $to = buttonsAppendTo.call(this);
           } else {
             $to = this.$element.find(buttonsAppendTo);
@@ -751,17 +776,17 @@
       }, {
         key: 'updateSteps',
         value: function updateSteps() {
-          var self = this;
+          var _this = this;
 
-          _jQuery2.default.each(this.steps,
+          _jquery2.default.each(this.steps,
 
             function(i, step) {
-              if (i > self._current) {
+              if (i > _this._current) {
                 step.leave('error');
                 step.leave('active');
                 step.leave('done');
 
-                if (!self.options.enableWhenVisited) {
+                if (!_this.options.enableWhenVisited) {
                   step.enter('disabled');
                 }
               }
@@ -799,7 +824,7 @@
 
           var data = [this].concat(args);
 
-          this.$element.trigger('wizard::' + eventType, data);
+          this.$element.trigger(NAMESPACE$1 + '::' + eventType, data);
 
           // callback
           eventType = eventType.replace(/\b\w+\b/g,
@@ -857,32 +882,31 @@
               current.enter('error');
 
               return -1;
-            } else {
-              current.leave('error');
+            }
+            current.leave('error');
 
-              if (index > this._current) {
-                current.enter('done');
-              }
+            if (index > this._current) {
+              current.enter('done');
             }
           }
 
-          var self = this;
+          var that = this;
           var process = function process() {
-            self.trigger('beforeChange', current, to);
-            self.transitioning = true;
+            that.trigger('beforeChange', current, to);
+            that.transitioning = true;
 
             current.hide();
             to.show(
 
               function() {
-                self._current = index;
-                self.transitioning = false;
+                that._current = index;
+                that.transitioning = false;
                 this.leave('disabled');
 
-                self.updateButtons();
-                self.updateSteps();
+                that.updateButtons();
+                that.updateSteps();
 
-                if (self.options.autoFocus) {
+                if (that.options.autoFocus) {
                   var $input = this.$pane.find(':input');
 
                   if ($input.length > 0) {
@@ -892,11 +916,11 @@
                   }
                 }
 
-                if (_jQuery2.default.isFunction(callback)) {
-                  callback.call(self);
+                if (_jquery2.default.isFunction(callback)) {
+                  callback.call(that);
                 }
 
-                self.trigger('afterChange', current, to);
+                that.trigger('afterChange', current, to);
               }
             );
           };
@@ -937,14 +961,14 @@
       }, {
         key: 'next',
         value: function next() {
-          var _this = this;
+          var _this2 = this;
 
           if (this._current < this.lastIndex()) {
             (function() {
-              var from = _this._current,
-                to = _this._current + 1;
+              var from = _this2._current,
+                to = _this2._current + 1;
 
-              _this.goTo(to,
+              _this2.goTo(to,
 
                 function() {
                   this.trigger('next', this.get(from), this.get(to));
@@ -958,14 +982,14 @@
       }, {
         key: 'back',
         value: function back() {
-          var _this2 = this;
+          var _this3 = this;
 
           if (this._current > 0) {
             (function() {
-              var from = _this2._current,
-                to = _this2._current - 1;
+              var from = _this3._current,
+                to = _this3._current - 1;
 
-              _this2.goTo(to,
+              _this3.goTo(to,
 
                 function() {
                   this.trigger('back', this.get(from), this.get(to));
@@ -1001,7 +1025,7 @@
         value: function reset() {
           this._current = 0;
 
-          _jQuery2.default.each(this.steps,
+          _jquery2.default.each(this.steps,
 
             function(i, step) {
               step.reset();
@@ -1011,83 +1035,32 @@
           this.trigger('reset');
         }
       }], [{
-        key: '_jQueryInterface',
-        value: function _jQueryInterface(options) {
-          var _this3 = this;
-
-          for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-            args[_key3 - 1] = arguments[_key3];
-          }
-
-          if (typeof options === 'string') {
-            var _ret3 = function() {
-              var method = options;
-
-              if (/^\_/.test(method)) {
-
-                return {
-                  v: false
-                };
-              } else if (/^(get)$/.test(method)) {
-                var api = _this3.first().data('wizard');
-
-                if (api && typeof api[method] === 'function') {
-
-                  return {
-                    v: api[method].apply(api, args)
-                  };
-                }
-              } else {
-
-                return {
-                  v: _this3.each(
-
-                    function() {
-                      var api = _jQuery2.default.data(this, 'wizard');
-
-                      if (api && typeof api[method] === 'function') {
-                        api[method].apply(api, args);
-                      }
-                    }
-                  )
-                };
-              }
-            }();
-
-            if ((typeof _ret3 === 'undefined' ? 'undefined' : _typeof(_ret3)) === "object")
-
-              return _ret3.v;
-          }
-
-          return this.each(
-
-            function() {
-              if (!_jQuery2.default.data(this, 'wizard')) {
-                _jQuery2.default.data(this, 'wizard', new wizard(this, options));
-              }
-            }
-          );
+        key: 'setDefaults',
+        value: function setDefaults(options) {
+          _jquery2.default.extend(DEFAULTS, _jquery2.default.isPlainObject(options) && options);
         }
       }]);
 
       return wizard;
     }();
 
-    (0, _jQuery2.default)(document).on('click', '[data-wizard]',
+    (0, _jquery2.default)(document).on('click', '[data-wizard]',
 
       function(e) {
-        var href = void 0;
-        var $this = (0, _jQuery2.default)(this);
-        var $target = (0, _jQuery2.default)($this.attr('data-target') || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, ''));
+        'use strict';
 
-        var wizard = $target.data('wizard');
+        var href = void 0;
+        var $this = (0, _jquery2.default)(this);
+        var $target = (0, _jquery2.default)($this.attr('data-target') || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, ''));
+
+        var wizard = $target.data(NAMESPACE$1);
 
         if (!wizard) {
 
           return;
         }
 
-        var method = $this.data('wizard');
+        var method = $this.data(NAMESPACE$1);
 
         if (/^(back|next|first|finish|reset)$/.test(method)) {
           wizard[method]();
@@ -1097,17 +1070,79 @@
       }
     );
 
-    _jQuery2.default.fn[NAME] = wizard._jQueryInterface;
-    _jQuery2.default.fn[NAME].constructor = wizard;
-    _jQuery2.default.fn[NAME].noConflict = function() {
-      'use strict';
+    var info = {
+      version: '0.4.0'
+    };
 
-      _jQuery2.default.fn[NAME] = window.JQUERY_NO_CONFLICT;
+    var NAMESPACE = 'wizard';
+    var OtherWizard = _jquery2.default.fn.wizard;
 
-      return wizard._jQueryInterface;
-    }
-    ;
+    var jQueryWizard = function jQueryWizard(options) {
+      var _this4 = this;
 
-    exports.default = wizard;
+      for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+        args[_key3 - 1] = arguments[_key3];
+      }
+
+      if (typeof options === 'string') {
+        var _ret3 = function() {
+          var method = options;
+
+          if (/^_/.test(method)) {
+
+            return {
+              v: false
+            };
+          } else if (/^(get)/.test(method)) {
+            var instance = _this4.first().data(NAMESPACE);
+
+            if (instance && typeof instance[method] === 'function') {
+
+              return {
+                v: instance[method].apply(instance, args)
+              };
+            }
+          } else {
+
+            return {
+              v: _this4.each(
+
+                function() {
+                  var instance = _jquery2.default.data(this, NAMESPACE);
+
+                  if (instance && typeof instance[method] === 'function') {
+                    instance[method].apply(instance, args);
+                  }
+                }
+              )
+            };
+          }
+        }();
+
+        if ((typeof _ret3 === 'undefined' ? 'undefined' : _typeof(_ret3)) === "object")
+
+          return _ret3.v;
+      }
+
+      return this.each(
+
+        function() {
+          if (!(0, _jquery2.default)(this).data(NAMESPACE)) {
+            (0, _jquery2.default)(this).data(NAMESPACE, new wizard(this, options));
+          }
+        }
+      );
+    };
+
+    _jquery2.default.fn.wizard = jQueryWizard;
+
+    _jquery2.default.wizard = _jquery2.default.extend({
+      setDefaults: wizard.setDefaults,
+      noConflict: function noConflict() {
+        _jquery2.default.fn.wizard = OtherWizard;
+
+        return jQueryWizard;
+      }
+    }, info);
   }
 );

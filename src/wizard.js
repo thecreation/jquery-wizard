@@ -1,18 +1,15 @@
-/*! jQuery wizard - v0.3.1 - 2015-05-07
- * https://github.com/amazingSurge/jquery-wizard
- * Copyright (c) 2015 amazingSurge; Licensed GPL */
-import $ from 'jQuery';
-import defaults from './defaults';
+import $ from 'jquery';
+import DEFAULTS from './defaults';
 import Step from './step';
 
 let counter = 0;
-const NAME = 'wizard';
+const NAMESPACE = 'wizard';
 
 class wizard {
   constructor(element, options) {
     this.$element = $(element);
 
-    this.options = $.extend(true, {}, defaults, options);
+    this.options = $.extend(true, {}, DEFAULTS, options);
 
     this.$steps = this.$element.find(this.options.step);
 
@@ -22,15 +19,17 @@ class wizard {
       this.$element.attr('id', this.id);
     }
 
+    this.trigger('init');
+
     this.initialize();
   }
 
   initialize() {
     this.steps = [];
-    const self = this;
+    const that = this;
 
     this.$steps.each(function (index) {
-      self.steps.push(new Step(this, self, index));
+      that.steps.push(new Step(this, that, index));
     });
 
     this._current = 0;
@@ -45,8 +44,8 @@ class wizard {
     this.$element.on('click', this.options.step, function (e) {
       const index = $(this).data('wizard-index');
 
-      if (!self.get(index).is('disabled')) {
-        self.goTo(index);
+      if (!that.get(index).is('disabled')) {
+        that.goTo(index);
       }
 
       e.preventDefault();
@@ -57,7 +56,7 @@ class wizard {
       $(document).on('keyup', $.proxy(this.keydown, this));
     }
 
-    this.trigger('init');
+    this.trigger('ready');
   }
 
   setup() {
@@ -99,16 +98,13 @@ class wizard {
   }
 
   updateSteps() {
-    const self = this;
-
     $.each(this.steps, (i, step) => {
-
-      if (i > self._current) {
+      if (i > this._current) {
         step.leave('error');
         step.leave('active');
         step.leave('done');
 
-        if (!self.options.enableWhenVisited) {
+        if (!this.options.enableWhenVisited) {
           step.enter('disabled');
         }
       }
@@ -137,7 +133,7 @@ class wizard {
   trigger(eventType, ...args) {
     const data = [this].concat(args);
 
-    this.$element.trigger(`wizard::${eventType}`, data);
+    this.$element.trigger(`${NAMESPACE}::${eventType}`, data);
 
     // callback
     eventType = eventType.replace(/\b\w+\b/g, word => word.substring(0, 1).toUpperCase() + word.substring(1));
@@ -179,30 +175,29 @@ class wizard {
         current.enter('error');
 
         return -1;
-      } else {
-        current.leave('error');
+      }
+      current.leave('error');
 
-        if (index > this._current) {
-          current.enter('done');
-        }
+      if (index > this._current) {
+        current.enter('done');
       }
     }
 
-    const self = this;
+    const that = this;
     const process = () => {
-      self.trigger('beforeChange', current, to);
-      self.transitioning = true;
+      that.trigger('beforeChange', current, to);
+      that.transitioning = true;
 
       current.hide();
       to.show(function () {
-        self._current = index;
-        self.transitioning = false;
+        that._current = index;
+        that.transitioning = false;
         this.leave('disabled');
 
-        self.updateButtons();
-        self.updateSteps();
+        that.updateButtons();
+        that.updateSteps();
 
-        if (self.options.autoFocus) {
+        if (that.options.autoFocus) {
           const $input = this.$pane.find(':input');
           if ($input.length > 0) {
             $input.eq(0).focus();
@@ -212,10 +207,10 @@ class wizard {
         }
 
         if ($.isFunction(callback)) {
-          callback.call(self);
+          callback.call(that);
         }
 
-        self.trigger('afterChange', current, to);
+        that.trigger('afterChange', current, to);
       });
     };
 
@@ -299,30 +294,8 @@ class wizard {
     this.trigger('reset');
   }
 
-  static _jQueryInterface(options, ...args) {
-    if (typeof options === 'string') {
-      const method = options;
-      if (/^\_/.test(method)) {
-        return false;
-      } else if ((/^(get)$/.test(method))) {
-        const api = this.first().data('wizard');
-        if (api && typeof api[method] === 'function') {
-          return api[method](...args);
-        }
-      } else {
-        return this.each(function () {
-          const api = $.data(this, 'wizard');
-          if (api && typeof api[method] === 'function') {
-            api[method](...args);
-          }
-        });
-      }
-    }
-    return this.each(function () {
-      if (!$.data(this, 'wizard')) {
-        $.data(this, 'wizard', new wizard(this, options));
-      }
-    });
+  static setDefaults(options) {
+    $.extend(DEFAULTS, $.isPlainObject(options) && options);
   }
 }
 
@@ -332,13 +305,13 @@ $(document).on('click', '[data-wizard]', function (e) {
   const $this = $(this);
   const $target = $($this.attr('data-target') || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, ''));
 
-  const wizard = $target.data('wizard');
+  const wizard = $target.data(NAMESPACE);
 
   if (!wizard) {
     return;
   }
 
-  const method = $this.data('wizard');
+  const method = $this.data(NAMESPACE);
 
   if (/^(back|next|first|finish|reset)$/.test(method)) {
     wizard[method]();
@@ -346,13 +319,5 @@ $(document).on('click', '[data-wizard]', function (e) {
 
   e.preventDefault();
 });
-
-$.fn[NAME] = wizard._jQueryInterface;
-$.fn[NAME].constructor = wizard;
-$.fn[NAME].noConflict = () => {
-  'use strict';
-  $.fn[NAME] = window.JQUERY_NO_CONFLICT;
-  return wizard._jQueryInterface;
-};
 
 export default wizard;

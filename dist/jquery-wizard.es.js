@@ -1,23 +1,24 @@
 /**
-* jQuery wizard
-* jquery wizard is a lightweight jquery plugin for creating step-by-step wizards.
-* Compiled: Fri Sep 02 2016 11:59:56 GMT+0800 (CST)
-* @version v0.3.1
-* @link https://github.com/amazingSurge/jquery-wizard
-* @copyright LGPL-3.0
+* jQuery wizard v0.4.0
+* https://github.com/amazingSurge/jquery-wizard
+*
+* Copyright (c) amazingSurge
+* Released under the LGPL-3.0 license
 */
-import $$1 from 'jQuery';
+import $ from 'jquery';
 
-var defaults = {
+/*eslint no-unused-vars: "off"*/
+/*eslint no-empty-function: "off"*/
+var DEFAULTS = {
   step: '.wizard-steps > li',
 
-  getPane(index, step) {
+  getPane: function(index, step) {
     return this.$element.find('.wizard-content').children().eq(index);
   },
 
   buttonsAppendTo: 'this',
   templates: {
-    buttons() {
+    buttons: function() {
       const options = this.options;
       return `<div class="wizard-buttons"><a class="wizard-back" href="#${this.id}" data-wizard="back" role="button">${options.buttonLabels.back}</a><a class="wizard-next" href="#${this.id}" data-wizard="next" role="button">${options.buttonLabels.next}</a><a class="wizard-finish" href="#${this.id}" data-wizard="finish" role="button">${options.buttonLabels.finish}</a></div>`;
     }
@@ -56,14 +57,14 @@ var defaults = {
   },
 
   loading: {
-    show(step) { },
-    hide(step) { },
-    fail(step) { }
+    show: function(step) { },
+    hide: function(step) { },
+    fail: function(step) { }
   },
 
   cacheContent: false,
 
-  validator(step) {
+  validator: function(step) {
     return true;
   },
 
@@ -87,40 +88,61 @@ var defaults = {
   onFinish: null
 };
 
-const Support = ((() => {
+/**
+ * Css features detect
+ **/
+let support = {};
+
+((support) => {
+  /**
+   * Borrowed from Owl carousel
+   **/
   const events = {
-    transition: {
-      end: {
-        WebkitTransition: 'webkitTransitionEnd',
-        MozTransition: 'transitionend',
-        OTransition: 'oTransitionEnd',
-        transition: 'transitionend'
+      transition: {
+        end: {
+          WebkitTransition: 'webkitTransitionEnd',
+          MozTransition: 'transitionend',
+          OTransition: 'oTransitionEnd',
+          transition: 'transitionend'
+        }
+      },
+      animation: {
+        end: {
+          WebkitAnimation: 'webkitAnimationEnd',
+          MozAnimation: 'animationend',
+          OAnimation: 'oAnimationEnd',
+          animation: 'animationend'
+        }
       }
-    }
-  },
+    },
     prefixes = ['webkit', 'Moz', 'O', 'ms'],
-    style = $$1('<support>').get(0).style,
+    style = $('<support>').get(0).style,
     tests = {
       csstransitions() {
         return Boolean(test('transition'));
+      },
+      cssanimations() {
+        return Boolean(test('animation'));
       }
     };
 
-  function test(property, prefixed) {
-    let result = false;
-    const upper = property.charAt(0).toUpperCase() + property.slice(1);
+  const test = (property, prefixed) => {
+    let result = false,
+      upper = property.charAt(0).toUpperCase() + property.slice(1);
 
     if (style[property] !== undefined) {
       result = property;
     }
     if (!result) {
-      $$1.each(prefixes, (i, prefix) => {
+      $.each(prefixes, (i, prefix) => {
         if (style[prefix + upper] !== undefined) {
           result = `-${prefix.toLowerCase()}-${upper}`;
           return false;
         }
+        return true;
       });
     }
+
     if (prefixed) {
       return result;
     }
@@ -128,34 +150,39 @@ const Support = ((() => {
       return true;
     }
     return false;
-  }
+  };
 
-  function prefixed(property) {
+  const prefixed = (property) => {
     return test(property, true);
-  }
-  const support = {};
+  };
+
   if (tests.csstransitions()) {
-    /* jshint -W053 */
-    support.transition = new String(prefixed('transition'))
+    /*eslint no-new-wrappers: "off"*/
+    support.transition = new String(prefixed('transition'));
     support.transition.end = events.transition.end[support.transition];
   }
 
-  return support;
-}))();
+  if (tests.cssanimations()) {
+    /*eslint no-new-wrappers: "off"*/
+    support.animation = new String(prefixed('animation'));
+    support.animation.end = events.animation.end[support.animation];
+  }
+})(support);
 
-var emulateTransitionEnd = ($el, duration) => {
+function emulateTransitionEnd ($el, duration) {
+    'use strict';
   let called = false;
 
-  $el.one(Support.transition.end, () => {
+  $el.one(support.transition.end, () => {
     called = true;
   });
   const callback = () => {
     if (!called) {
-      $el.trigger(Support.transition.end);
+      $el.trigger(support.transition.end);
     }
   };
   setTimeout(callback, duration);
-};
+}
 
 class Step {
   constructor(element, wizard, index) {
@@ -207,9 +234,8 @@ class Step {
 
     if (selector) {
       return $(selector);
-    } else {
-      return null;
     }
+    return null;
   }
 
   setup() {
@@ -254,8 +280,7 @@ class Step {
       .attr('aria-expanded', true);
 
     const complete = function () {
-      this.$pane
-        .removeClass(classes.pane.activing)
+      this.$pane.removeClass(classes.pane.activing);
 
       this.leave('activing');
       this.enter('active');
@@ -266,11 +291,12 @@ class Step {
       }
     };
 
-    if (!Support.transition) {
-      return complete.call(this);
+    if (!support.transition) {
+      complete.call(this);
+      return;
     }
 
-    this.$pane.one(Support.transition.end, $.proxy(complete, this));
+    this.$pane.one(support.transition.end, $.proxy(complete, this));
 
     emulateTransitionEnd(this.$pane, this.TRANSITION_DURATION);
   }
@@ -306,11 +332,12 @@ class Step {
       }
     };
 
-    if (!Support.transition) {
-      return complete.call(this);
+    if (!support.transition) {
+      complete.call(this);
+      return;
     }
 
-    this.$pane.one(Support.transition.end, $.proxy(complete, this));
+    this.$pane.one(support.transition.end, $.proxy(complete, this));
 
     emulateTransitionEnd(this.$pane, this.TRANSITION_DURATION);
   }
@@ -320,7 +347,7 @@ class Step {
   }
 
   load(callback) {
-    const self = this;
+    const that = this;
     let loader = this.loader;
 
     if ($.isFunction(loader)) {
@@ -331,35 +358,35 @@ class Step {
       if ($.isFunction(callback)) {
         callback.call(this);
       }
-      return true;
+      return;
     }
 
     this.trigger('beforeLoad');
     this.enter('loading');
 
     function setContent(content) {
-      self.$pane.html(content);
+      that.$pane.html(content);
 
-      self.leave('loading');
-      self.loaded = true;
-      self.trigger('afterLoad');
+      that.leave('loading');
+      that.loaded = true;
+      that.trigger('afterLoad');
 
       if ($.isFunction(callback)) {
-        callback.call(self);
+        callback.call(that);
       }
     }
 
     if (typeof loader === 'string') {
       setContent(loader);
     } else if (typeof loader === 'object' && loader.hasOwnProperty('url')) {
-      self.wizard.options.loading.show.call(self.wizard, self);
+      that.wizard.options.loading.show.call(that.wizard, that);
 
       $.ajax(loader.url, loader.settings || {}).done(data => {
         setContent(data);
 
-        self.wizard.options.loading.hide.call(self.wizard, self);
+        that.wizard.options.loading.hide.call(that.wizard, that);
       }).fail(() => {
-        self.wizard.options.loading.fail.call(self.wizard, self);
+        that.wizard.options.loading.fail.call(that.wizard, that);
       });
     } else {
       setContent('');
@@ -419,7 +446,7 @@ class Step {
         this.loader = {
           url,
           settings: this.$pane.data('settings') || {}
-        }
+        };
       }
     }
   }
@@ -446,6 +473,7 @@ class Step {
   off(event, handler) {
     if ($.isFunction(handler) && $.isArray(this.events[event])) {
       $.each(this.events[event], function (i, f) {
+        /*eslint consistent-return: "off"*/
         if (f === handler) {
           delete this.events[event][i];
           return false;
@@ -495,13 +523,13 @@ class Step {
 }
 
 let counter = 0;
-const NAME = 'wizard';
+const NAMESPACE$1 = 'wizard';
 
 class wizard {
   constructor(element, options) {
-    this.$element = $$1(element);
+    this.$element = $(element);
 
-    this.options = $$1.extend(true, {}, defaults, options);
+    this.options = $.extend(true, {}, DEFAULTS, options);
 
     this.$steps = this.$element.find(this.options.step);
 
@@ -511,31 +539,33 @@ class wizard {
       this.$element.attr('id', this.id);
     }
 
+    this.trigger('init');
+
     this.initialize();
   }
 
   initialize() {
     this.steps = [];
-    const self = this;
+    const that = this;
 
     this.$steps.each(function (index) {
-      self.steps.push(new Step(this, self, index));
+      that.steps.push(new Step(this, that, index));
     });
 
     this._current = 0;
     this.transitioning = null;
 
-    $$1.each(this.steps, (i, step) => {
+    $.each(this.steps, (i, step) => {
       step.setup();
     });
 
     this.setup();
 
     this.$element.on('click', this.options.step, function (e) {
-      const index = $$1(this).data('wizard-index');
+      const index = $(this).data('wizard-index');
 
-      if (!self.get(index).is('disabled')) {
-        self.goTo(index);
+      if (!that.get(index).is('disabled')) {
+        that.goTo(index);
       }
 
       e.preventDefault();
@@ -543,14 +573,14 @@ class wizard {
     });
 
     if (this.options.keyboard) {
-      $$1(document).on('keyup', $$1.proxy(this.keydown, this));
+      $(document).on('keyup', $.proxy(this.keydown, this));
     }
 
-    this.trigger('init');
+    this.trigger('ready');
   }
 
   setup() {
-    this.$buttons = $$1(this.options.templates.buttons.call(this));
+    this.$buttons = $(this.options.templates.buttons.call(this));
 
     this.updateButtons();
 
@@ -558,7 +588,7 @@ class wizard {
     let $to;
     if (buttonsAppendTo === 'this') {
       $to = this.$element;
-    } else if ($$1.isFunction(buttonsAppendTo)) {
+    } else if ($.isFunction(buttonsAppendTo)) {
       $to = buttonsAppendTo.call(this);
     } else {
       $to = this.$element.find(buttonsAppendTo);
@@ -588,16 +618,13 @@ class wizard {
   }
 
   updateSteps() {
-    const self = this;
-
-    $$1.each(this.steps, (i, step) => {
-
-      if (i > self._current) {
+    $.each(this.steps, (i, step) => {
+      if (i > this._current) {
         step.leave('error');
         step.leave('active');
         step.leave('done');
 
-        if (!self.options.enableWhenVisited) {
+        if (!this.options.enableWhenVisited) {
           step.enter('disabled');
         }
       }
@@ -626,7 +653,7 @@ class wizard {
   trigger(eventType, ...args) {
     const data = [this].concat(args);
 
-    this.$element.trigger(`wizard::${eventType}`, data);
+    this.$element.trigger(`${NAMESPACE$1}::${eventType}`, data);
 
     // callback
     eventType = eventType.replace(/\b\w+\b/g, word => word.substring(0, 1).toUpperCase() + word.substring(1));
@@ -668,30 +695,29 @@ class wizard {
         current.enter('error');
 
         return -1;
-      } else {
-        current.leave('error');
+      }
+      current.leave('error');
 
-        if (index > this._current) {
-          current.enter('done');
-        }
+      if (index > this._current) {
+        current.enter('done');
       }
     }
 
-    const self = this;
+    const that = this;
     const process = () => {
-      self.trigger('beforeChange', current, to);
-      self.transitioning = true;
+      that.trigger('beforeChange', current, to);
+      that.transitioning = true;
 
       current.hide();
       to.show(function () {
-        self._current = index;
-        self.transitioning = false;
+        that._current = index;
+        that.transitioning = false;
         this.leave('disabled');
 
-        self.updateButtons();
-        self.updateSteps();
+        that.updateButtons();
+        that.updateSteps();
 
-        if (self.options.autoFocus) {
+        if (that.options.autoFocus) {
           const $input = this.$pane.find(':input');
           if ($input.length > 0) {
             $input.eq(0).focus();
@@ -700,11 +726,11 @@ class wizard {
           }
         }
 
-        if ($$1.isFunction(callback)) {
-          callback.call(self);
+        if ($.isFunction(callback)) {
+          callback.call(that);
         }
 
-        self.trigger('afterChange', current, to);
+        that.trigger('afterChange', current, to);
       });
     };
 
@@ -781,52 +807,31 @@ class wizard {
   reset() {
     this._current = 0;
 
-    $$1.each(this.steps, (i, step) => {
+    $.each(this.steps, (i, step) => {
       step.reset();
     });
 
     this.trigger('reset');
   }
 
-  static _jQueryInterface(options, ...args) {
-    if (typeof options === 'string') {
-      const method = options;
-      if (/^\_/.test(method)) {
-        return false;
-      } else if ((/^(get)$/.test(method))) {
-        const api = this.first().data('wizard');
-        if (api && typeof api[method] === 'function') {
-          return api[method](...args);
-        }
-      } else {
-        return this.each(function () {
-          const api = $$1.data(this, 'wizard');
-          if (api && typeof api[method] === 'function') {
-            api[method](...args);
-          }
-        });
-      }
-    }
-    return this.each(function () {
-      if (!$$1.data(this, 'wizard')) {
-        $$1.data(this, 'wizard', new wizard(this, options));
-      }
-    });
+  static setDefaults(options) {
+    $.extend(DEFAULTS, $.isPlainObject(options) && options);
   }
 }
 
-$$1(document).on('click', '[data-wizard]', function (e) {
+$(document).on('click', '[data-wizard]', function (e) {
+  'use strict';
   let href;
-  const $this = $$1(this);
-  const $target = $$1($this.attr('data-target') || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, ''));
+  const $this = $(this);
+  const $target = $($this.attr('data-target') || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, ''));
 
-  const wizard = $target.data('wizard');
+  const wizard = $target.data(NAMESPACE$1);
 
   if (!wizard) {
     return;
   }
 
-  const method = $this.data('wizard');
+  const method = $this.data(NAMESPACE$1);
 
   if (/^(back|next|first|finish|reset)$/.test(method)) {
     wizard[method]();
@@ -835,12 +840,47 @@ $$1(document).on('click', '[data-wizard]', function (e) {
   e.preventDefault();
 });
 
-$$1.fn[NAME] = wizard._jQueryInterface;
-$$1.fn[NAME].constructor = wizard;
-$$1.fn[NAME].noConflict = () => {
-  'use strict';
-  $$1.fn[NAME] = window.JQUERY_NO_CONFLICT;
-  return wizard._jQueryInterface;
+var info = {
+  version:'0.4.0'
 };
 
-export default wizard;
+const NAMESPACE = 'wizard';
+const OtherWizard = $.fn.wizard;
+
+const jQueryWizard = function(options, ...args) {
+  if (typeof options === 'string') {
+    const method = options;
+
+    if (/^_/.test(method)) {
+      return false;
+    } else if ((/^(get)/.test(method))) {
+      const instance = this.first().data(NAMESPACE);
+      if (instance && typeof instance[method] === 'function') {
+        return instance[method](...args);
+      }
+    } else {
+      return this.each(function() {
+        const instance = $.data(this, NAMESPACE);
+        if (instance && typeof instance[method] === 'function') {
+          instance[method](...args);
+        }
+      });
+    }
+  }
+
+  return this.each(function() {
+    if (!$(this).data(NAMESPACE)) {
+      $(this).data(NAMESPACE, new wizard(this, options));
+    }
+  });
+};
+
+$.fn.wizard = jQueryWizard;
+
+$.wizard = $.extend({
+  setDefaults: wizard.setDefaults,
+  noConflict: function() {
+    $.fn.wizard = OtherWizard;
+    return jQueryWizard;
+  }
+}, info);

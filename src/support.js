@@ -1,28 +1,46 @@
-import $ from 'jQuery';
+/**
+ * Css features detect
+ **/
+import $ from "jquery";
 
-const Support = ((() => {
-  'use strict';
+let support = {};
+
+((support) => {
+  /**
+   * Borrowed from Owl carousel
+   **/
   const events = {
-    transition: {
-      end: {
-        WebkitTransition: 'webkitTransitionEnd',
-        MozTransition: 'transitionend',
-        OTransition: 'oTransitionEnd',
-        transition: 'transitionend'
+      transition: {
+        end: {
+          WebkitTransition: 'webkitTransitionEnd',
+          MozTransition: 'transitionend',
+          OTransition: 'oTransitionEnd',
+          transition: 'transitionend'
+        }
+      },
+      animation: {
+        end: {
+          WebkitAnimation: 'webkitAnimationEnd',
+          MozAnimation: 'animationend',
+          OAnimation: 'oAnimationEnd',
+          animation: 'animationend'
+        }
       }
-    }
-  },
+    },
     prefixes = ['webkit', 'Moz', 'O', 'ms'],
     style = $('<support>').get(0).style,
     tests = {
       csstransitions() {
         return Boolean(test('transition'));
+      },
+      cssanimations() {
+        return Boolean(test('animation'));
       }
     };
 
-  function test(property, prefixed) {
-    let result = false;
-    const upper = property.charAt(0).toUpperCase() + property.slice(1);
+  const test = (property, prefixed) => {
+    let result = false,
+      upper = property.charAt(0).toUpperCase() + property.slice(1);
 
     if (style[property] !== undefined) {
       result = property;
@@ -33,8 +51,10 @@ const Support = ((() => {
           result = `-${prefix.toLowerCase()}-${upper}`;
           return false;
         }
+        return true;
       });
     }
+
     if (prefixed) {
       return result;
     }
@@ -42,19 +62,23 @@ const Support = ((() => {
       return true;
     }
     return false;
-  }
+  };
 
-  function prefixed(property) {
+  const prefixed = (property) => {
     return test(property, true);
-  }
-  const support = {};
+  };
+
   if (tests.csstransitions()) {
-    /* jshint -W053 */
+    /*eslint no-new-wrappers: "off"*/
     support.transition = new String(prefixed('transition'));
     support.transition.end = events.transition.end[support.transition];
   }
 
-  return support;
-}))();
+  if (tests.cssanimations()) {
+    /*eslint no-new-wrappers: "off"*/
+    support.animation = new String(prefixed('animation'));
+    support.animation.end = events.animation.end[support.animation];
+  }
+})(support);
 
-export default Support;
+export default support;

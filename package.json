@@ -2,23 +2,34 @@
   "name": "jquery-wizard",
   "title": "jQuery wizard",
   "description": "jquery wizard is a lightweight jquery plugin for creating step-by-step wizards.",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "homepage": "https://github.com/amazingSurge/jquery-wizard",
   "author": {
     "name": "amazingSurge",
-    "email": "amazingsurge@gmail.com",
+    "email": "amazingSurge@gmail.com",
     "url": "amazingSurge.com"
   },
   "repository": {
     "type": "git",
     "url": "git@github.com:amazingSurge/jquery-wizard.git"
   },
+  "keywords": [
+    "jquery",
+    "jquery-plugin",
+    "ecosystem:jquery",
+    "ui",
+    "es6",
+    "wizard"
+  ],
   "bugs": "https://github.com/amazingSurge/jquery-wizard/issues",
-  "licenses": [{
-    "type": "LGPL-3.0",
-    "url": "https://github.com/amazingSurge/jquery-wizard/blob/master/LICENSE"
-  }],
+  "licenses": [
+    {
+      "type": "LGPL-3.0",
+      "url": "https://github.com/amazingSurge/jquery-wizard/blob/master/LICENSE"
+    }
+  ],
   "license": "LGPL-3.0",
+  "main": "dist/jquery-wizard.js",
   "files": [
     "dist",
     "src"
@@ -29,14 +40,16 @@
     "build": "npm run prestart && gulp build",
     "deploy": "gulp deploy",
     "deploy:prepare": "gulp deploy:prepare",
+    "release": "gulp release",
     "test": "gulp test"
   },
   "devDependencies": {
     "argv": "*",
+    "assets-manager": "*",
     "babel-core": "*",
     "babel-eslint": "*",
     "babel-istanbul": "*",
-    "babel-plugin-transform-es2015-modules-umd": "^6.12.0",
+    "babel-plugin-transform-es2015-modules-umd": "*",
     "babel-preset-es2015": "*",
     "babel-preset-es2015-rollup": "*",
     "babelrc-rollup": "*",
@@ -55,7 +68,6 @@
     "gulp-eslint": "*",
     "gulp-extname": "*",
     "gulp-filter": "*",
-    "gulp-fontmin": "*",
     "gulp-header": "*",
     "gulp-iconfont-css": "*",
     "gulp-if": "*",
@@ -93,6 +105,7 @@
     "node-notifier": "*",
     "path-exists": "*",
     "phantomjs-prebuilt": "*",
+    "release-it": "*",
     "rollup-plugin-babel": "*",
     "rollup-plugin-istanbul": "*",
     "sinon": "*",
@@ -104,5 +117,8 @@
   "engines": {
     "node": ">= 6.2.2",
     "npm": ">= 3"
+  },
+  "dependencies": {
+    "jquery": ">=2.2.0"
   }
 }

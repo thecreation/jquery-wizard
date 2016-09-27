@@ -1,10 +1,9 @@
 /**
-* jQuery wizard
-* jquery wizard is a lightweight jquery plugin for creating step-by-step wizards.
-* Compiled: Fri Sep 02 2016 11:59:56 GMT+0800 (CST)
-* @version v0.3.1
-* @link https://github.com/amazingSurge/jquery-wizard
-* @copyright LGPL-3.0
+* jQuery wizard v0.4.0
+* https://github.com/amazingSurge/jquery-wizard
+*
+* Copyright (c) amazingSurge
+* Released under the LGPL-3.0 license
 */
 .hide {
   display: none;

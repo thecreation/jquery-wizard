@@ -1,6 +1,6 @@
-import $ from 'jQuery';
+import $ from 'jquery';
 import Support from './support';
-import emulateTransitionEnd from './emulateTransitionEnd';
+import * as util from './util';
 
 class Step {
   constructor(element, wizard, index) {
@@ -52,9 +52,8 @@ class Step {
 
     if (selector) {
       return $(selector);
-    } else {
-      return null;
     }
+    return null;
   }
 
   setup() {
@@ -111,12 +110,13 @@ class Step {
     };
 
     if (!Support.transition) {
-      return complete.call(this);
+      complete.call(this);
+      return;
     }
 
     this.$pane.one(Support.transition.end, $.proxy(complete, this));
 
-    emulateTransitionEnd(this.$pane, this.TRANSITION_DURATION);
+    util.emulateTransitionEnd(this.$pane, this.TRANSITION_DURATION);
   }
 
   hide(callback) {
@@ -151,12 +151,13 @@ class Step {
     };
 
     if (!Support.transition) {
-      return complete.call(this);
+      complete.call(this);
+      return;
     }
 
     this.$pane.one(Support.transition.end, $.proxy(complete, this));
 
-    emulateTransitionEnd(this.$pane, this.TRANSITION_DURATION);
+    util.emulateTransitionEnd(this.$pane, this.TRANSITION_DURATION);
   }
 
   empty() {
@@ -164,7 +165,7 @@ class Step {
   }
 
   load(callback) {
-    const self = this;
+    const that = this;
     let loader = this.loader;
 
     if ($.isFunction(loader)) {
@@ -175,35 +176,35 @@ class Step {
       if ($.isFunction(callback)) {
         callback.call(this);
       }
-      return true;
+      return;
     }
 
     this.trigger('beforeLoad');
     this.enter('loading');
 
     function setContent(content) {
-      self.$pane.html(content);
+      that.$pane.html(content);
 
-      self.leave('loading');
-      self.loaded = true;
-      self.trigger('afterLoad');
+      that.leave('loading');
+      that.loaded = true;
+      that.trigger('afterLoad');
 
       if ($.isFunction(callback)) {
-        callback.call(self);
+        callback.call(that);
       }
     }
 
     if (typeof loader === 'string') {
       setContent(loader);
     } else if (typeof loader === 'object' && loader.hasOwnProperty('url')) {
-      self.wizard.options.loading.show.call(self.wizard, self);
+      that.wizard.options.loading.show.call(that.wizard, that);
 
       $.ajax(loader.url, loader.settings || {}).done(data => {
         setContent(data);
 
-        self.wizard.options.loading.hide.call(self.wizard, self);
+        that.wizard.options.loading.hide.call(that.wizard, that);
       }).fail(() => {
-        self.wizard.options.loading.fail.call(self.wizard, self);
+        that.wizard.options.loading.fail.call(that.wizard, that);
       });
     } else {
       setContent('');
@@ -290,6 +291,7 @@ class Step {
   off(event, handler) {
     if ($.isFunction(handler) && $.isArray(this.events[event])) {
       $.each(this.events[event], function (i, f) {
+        /*eslint consistent-return: "off"*/
         if (f === handler) {
           delete this.events[event][i];
           return false;

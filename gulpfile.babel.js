@@ -5,16 +5,19 @@ import gulp        from 'gulp';
 import config      from './config';
 
 // Tasks
-import clean              from './gulp/tasks/clean';
-import styles             from './gulp/tasks/styles';
-import {bundler,scripts}  from './gulp/tasks/scripts';
-import * as lintScripts   from './gulp/tasks/lint-scripts';
-import * as lintStyles    from './gulp/tasks/lint-styles';
-import test               from './gulp/tasks/test';
-import * as deploy        from './gulp/tasks/deploy';
-import * as browser       from './gulp/tasks/browser';
-import archive            from './gulp/tasks/archive';
+import clean                     from './gulp/tasks/clean';
+import styles                    from './gulp/tasks/styles';
+import {version,bundler,scripts} from './gulp/tasks/scripts';
+import * as lintScripts          from './gulp/tasks/lint-scripts';
+import * as lintStyles           from './gulp/tasks/lint-styles';
+import test                      from './gulp/tasks/test';
+import * as deploy               from './gulp/tasks/deploy';
+import * as browser              from './gulp/tasks/browser';
+import * as assets               from './gulp/tasks/assets';
+import archive                   from './gulp/tasks/archive';
+import release                   from './gulp/tasks/release';
 
+gulp.task('version', version());
 gulp.task('bundler', bundler());
 gulp.task('scripts', scripts());
 gulp.task('clean', clean(config.scripts.dest));
@@ -24,7 +27,11 @@ gulp.task('styles', styles());
 gulp.task('clean:styles', clean(config.styles.dest));
 
 // Build the files
-gulp.task('build', gulp.series('clean', 'bundler', 'scripts','styles'));
+gulp.task('build', gulp.series('clean', 'version', 'bundler', 'scripts', 'styles'));
+
+// Assets
+gulp.task('assets', assets.copy());
+gulp.task('clean:assets', assets.clean());
 
 // Lint Styles
 gulp.task('lint:css', lintStyles.css());
@@ -88,5 +95,8 @@ gulp.task('watch', () => {
   gulp.watch(config.styles.src,  gulp.series('styles', 'reload'));
 });
 
+// Release task
+gulp.task('release', release());
+
 // Register default task
-gulp.task('default', gulp.series('serve'));
+gulp.task('default', gulp.series('lint:es:src', 'serve'));

@@ -38,7 +38,7 @@ Several quick start options are available:
 
 #### Install From Bower
 ```sh
-bower install jquery-wizard --save
+bower install jquery-wizard.js --save
 ```
 
 #### Install From Npm
@@ -362,7 +362,7 @@ Licensed under [the LGPL license](LICENSE).
 
 [⬆ back to top](#table-of-contents)
 
-[bower-image]: https://img.shields.io/bower/v/jquery-wizard.svg?style=flat
+[bower-image]: https://img.shields.io/bower/v/jquery-wizard.js.svg?style=flat
 [bower-link]: https://david-dm.org/amazingSurge/jquery-wizard/dev-status.svg
 [npm-image]: https://badge.fury.io/js/jquery-wizard.svg?style=flat
 [npm-url]: https://npmjs.org/package/jquery-wizard

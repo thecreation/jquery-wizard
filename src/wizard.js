@@ -6,7 +6,7 @@ let counter = 0;
 const NAMESPACE = 'wizard';
 
 class wizard {
-  constructor(element, options) {
+  constructor(element, options = {}) {
     this.$element = $(element);
 
     this.options = $.extend(true, {}, DEFAULTS, options);
@@ -295,7 +295,7 @@ class wizard {
   }
 
   static setDefaults(options) {
-    $.extend(DEFAULTS, $.isPlainObject(options) && options);
+    $.extend(true, DEFAULTS, $.isPlainObject(options) && options);
   }
 }
 

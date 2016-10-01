@@ -1,5 +1,5 @@
 /**
-* jQuery wizard v0.4.0
+* jQuery wizard v0.4.1
 * https://github.com/amazingSurge/jquery-wizard
 *
 * Copyright (c) amazingSurge
@@ -526,7 +526,7 @@ let counter = 0;
 const NAMESPACE$1 = 'wizard';
 
 class wizard {
-  constructor(element, options) {
+  constructor(element, options = {}) {
     this.$element = $(element);
 
     this.options = $.extend(true, {}, DEFAULTS, options);
@@ -815,7 +815,7 @@ class wizard {
   }
 
   static setDefaults(options) {
-    $.extend(DEFAULTS, $.isPlainObject(options) && options);
+    $.extend(true, DEFAULTS, $.isPlainObject(options) && options);
   }
 }
 
@@ -841,7 +841,7 @@ $(document).on('click', '[data-wizard]', function (e) {
 });
 
 var info = {
-  version:'0.4.0'
+  version:'0.4.1'
 };
 
 const NAMESPACE = 'wizard';

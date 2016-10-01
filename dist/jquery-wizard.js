@@ -1,5 +1,5 @@
 /**
-* jQuery wizard v0.4.0
+* jQuery wizard v0.4.1
 * https://github.com/amazingSurge/jquery-wizard
 *
 * Copyright (c) amazingSurge
@@ -666,7 +666,9 @@
     var NAMESPACE$1 = 'wizard';
 
     var wizard = function() {
-      function wizard(element, options) {
+      function wizard(element) {
+        var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
         _classCallCheck(this, wizard);
 
         this.$element = (0, _jquery2.default)(element);
@@ -1037,7 +1039,7 @@
       }], [{
         key: 'setDefaults',
         value: function setDefaults(options) {
-          _jquery2.default.extend(DEFAULTS, _jquery2.default.isPlainObject(options) && options);
+          _jquery2.default.extend(true, DEFAULTS, _jquery2.default.isPlainObject(options) && options);
         }
       }]);
 
@@ -1071,7 +1073,7 @@
     );
 
     var info = {
-      version: '0.4.0'
+      version: '0.4.1'
     };
 
     var NAMESPACE = 'wizard';

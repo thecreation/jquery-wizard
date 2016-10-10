@@ -140,7 +140,7 @@ class wizard {
 
     const onFunction = `on${eventType}`;
     if (typeof this.options[onFunction] === 'function') {
-      this.options[onFunction](...args);
+      this.options[onFunction].call(this, ...args);
     }
   }
 

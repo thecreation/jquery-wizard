@@ -1,5 +1,5 @@
 /**
-* jQuery wizard v0.4.1
+* jQuery wizard v0.4.2
 * https://github.com/amazingSurge/jquery-wizard
 *
 * Copyright (c) amazingSurge
@@ -660,7 +660,7 @@ class wizard {
 
     const onFunction = `on${eventType}`;
     if (typeof this.options[onFunction] === 'function') {
-      this.options[onFunction](...args);
+      this.options[onFunction].call(this, ...args);
     }
   }
 
@@ -841,7 +841,7 @@ $(document).on('click', '[data-wizard]', function (e) {
 });
 
 var info = {
-  version:'0.4.1'
+  version:'0.4.2'
 };
 
 const NAMESPACE = 'wizard';

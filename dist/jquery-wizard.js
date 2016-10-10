@@ -1,5 +1,5 @@
 /**
-* jQuery wizard v0.4.1
+* jQuery wizard v0.4.2
 * https://github.com/amazingSurge/jquery-wizard
 *
 * Copyright (c) amazingSurge
@@ -52,7 +52,7 @@
       :
 
       function(obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
       };
 
     function _classCallCheck(instance, Constructor) {
@@ -667,7 +667,7 @@
 
     var wizard = function() {
       function wizard(element) {
-        var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
         _classCallCheck(this, wizard);
 
@@ -839,9 +839,9 @@
           var onFunction = 'on' + eventType;
 
           if (typeof this.options[onFunction] === 'function') {
-            var _options;
+            var _options$onFunction;
 
-            (_options = this.options)[onFunction].apply(_options, args);
+            (_options$onFunction = this.options[onFunction]).call.apply(_options$onFunction, [this].concat(args));
           }
         }
       }, {
@@ -1073,7 +1073,7 @@
     );
 
     var info = {
-      version: '0.4.1'
+      version: '0.4.2'
     };
 
     var NAMESPACE = 'wizard';

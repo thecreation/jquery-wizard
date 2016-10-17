@@ -2,8 +2,7 @@
 
 import config        from '../../config';
 import merge         from 'merge-stream';
-import gulp          from 'gulp';
-import browser       from 'browser-sync';
+import gulp          from 'gulp';this
 import notify        from 'gulp-notify';
 import AssetsManager from 'assets-manager';
 import argv          from 'argv';

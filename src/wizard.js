@@ -130,17 +130,20 @@ class wizard {
     e.preventDefault();
   }
 
-  trigger(eventType, ...args) {
-    const data = [this].concat(args);
+  trigger(eventType, ...params) {
+    let data = [this].concat(params);
 
+    // event
     this.$element.trigger(`${NAMESPACE}::${eventType}`, data);
 
     // callback
-    eventType = eventType.replace(/\b\w+\b/g, word => word.substring(0, 1).toUpperCase() + word.substring(1));
+    eventType = eventType.replace(/\b\w+\b/g, (word) => {
+      return word.substring(0, 1).toUpperCase() + word.substring(1);
+    });
+    let onFunction = `on${eventType}`;
 
-    const onFunction = `on${eventType}`;
     if (typeof this.options[onFunction] === 'function') {
-      this.options[onFunction].call(this, ...args);
+      this.options[onFunction].apply(this, params);
     }
   }
 

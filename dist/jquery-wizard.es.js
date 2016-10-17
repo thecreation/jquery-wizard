@@ -1,5 +1,5 @@
 /**
-* jQuery wizard v0.4.2
+* jQuery wizard v0.4.3
 * https://github.com/amazingSurge/jquery-wizard
 *
 * Copyright (c) amazingSurge
@@ -650,17 +650,20 @@ class wizard {
     e.preventDefault();
   }
 
-  trigger(eventType, ...args) {
-    const data = [this].concat(args);
+  trigger(eventType, ...params) {
+    let data = [this].concat(params);
 
+    // event
     this.$element.trigger(`${NAMESPACE$1}::${eventType}`, data);
 
     // callback
-    eventType = eventType.replace(/\b\w+\b/g, word => word.substring(0, 1).toUpperCase() + word.substring(1));
+    eventType = eventType.replace(/\b\w+\b/g, (word) => {
+      return word.substring(0, 1).toUpperCase() + word.substring(1);
+    });
+    let onFunction = `on${eventType}`;
 
-    const onFunction = `on${eventType}`;
     if (typeof this.options[onFunction] === 'function') {
-      this.options[onFunction].call(this, ...args);
+      this.options[onFunction].apply(this, params);
     }
   }
 
@@ -841,7 +844,7 @@ $(document).on('click', '[data-wizard]', function (e) {
 });
 
 var info = {
-  version:'0.4.2'
+  version:'0.4.3'
 };
 
 const NAMESPACE = 'wizard';

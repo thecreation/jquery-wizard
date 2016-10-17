@@ -60,7 +60,7 @@ rules:
   # Best Practices
   accessor-pairs: "error"
   block-scoped-var: "error"
-  consistent-return: "error"
+  consistent-return: "off"
   curly: "error"
   default-case: "error"
   dot-location: "off"

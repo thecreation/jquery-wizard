@@ -46,6 +46,11 @@ bower install jquery-wizard.js --save
 npm install jquery-wizard --save
 ```
 
+#### Install From Yarn
+```sh
+yarn add jquery-wizard
+```
+
 #### Build From Source
 If you want build from source:
 
@@ -296,9 +301,9 @@ Event       | Description
 ----------- | -----------
 init        | Fires when the instance is setup for the first time.
 ready       | Fires when the instance is ready for API use.
-next        | This event is fired immediately when the `next` instance method has been called.
-back        | This event is fired immediately when the `back` instance method has been called.
-reset       | This event is fired immediately when the `reset` instance method has been called.
+next        | Fired when the `next` instance method has been called.
+back        | Fired when the `back` instance method has been called.
+reset       | Fired when the `reset` instance method has been called.
 beforeChange| This event is fired before the step change.
 afterChange | This event is fired after the step change.
 finish      | Fires when the wizard is finished.

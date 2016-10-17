@@ -1,5 +1,5 @@
 /**
-* jQuery wizard v0.4.2
+* jQuery wizard v0.4.3
 * https://github.com/amazingSurge/jquery-wizard
 *
 * Copyright (c) amazingSurge
@@ -52,7 +52,7 @@
       :
 
       function(obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
       };
 
     function _classCallCheck(instance, Constructor) {
@@ -667,7 +667,7 @@
 
     var wizard = function() {
       function wizard(element) {
-        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
         _classCallCheck(this, wizard);
 
@@ -820,12 +820,13 @@
       }, {
         key: 'trigger',
         value: function trigger(eventType) {
-          for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-            args[_key2 - 1] = arguments[_key2];
+          for (var _len2 = arguments.length, params = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+            params[_key2 - 1] = arguments[_key2];
           }
 
-          var data = [this].concat(args);
+          var data = [this].concat(params);
 
+          // event
           this.$element.trigger(NAMESPACE$1 + '::' + eventType, data);
 
           // callback
@@ -835,13 +836,10 @@
               return word.substring(0, 1).toUpperCase() + word.substring(1);
             }
           );
-
           var onFunction = 'on' + eventType;
 
           if (typeof this.options[onFunction] === 'function') {
-            var _options$onFunction;
-
-            (_options$onFunction = this.options[onFunction]).call.apply(_options$onFunction, [this].concat(args));
+            this.options[onFunction].apply(this, params);
           }
         }
       }, {
@@ -1073,7 +1071,7 @@
     );
 
     var info = {
-      version: '0.4.2'
+      version: '0.4.3'
     };
 
     var NAMESPACE = 'wizard';

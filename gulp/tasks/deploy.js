@@ -1,17 +1,14 @@
 'use strict';
 
-import config    from '../../config';
-import gulp      from 'gulp';
-import inquirer  from 'inquirer';
-import replace   from 'gulp-replace';
-import {execSync as exec, spawnSync as spawn} from 'child_process';
+import config from '../../config';
+import gulp from 'gulp';
+import inquirer from 'inquirer';
+import replace from 'gulp-replace';
+import { execSync as exec, spawnSync as spawn } from 'child_process';
+import semver from 'semver';
+import gutil from 'gulp-util';
 
-let VERSIONED_FILES = [
-  'bower.json',
-  'package.json'
-];
-
-let CURRENT_VERSION = require('../../package.json').version;
+const CURRENT_VERSION = config.version;
 let NEXT_VERSION;
 let NEXT_MESSAGE;
 
@@ -27,8 +24,9 @@ export function prompt(done) {
       return /^\d*[\d.]*\d*$/.test(input);
     }
   }]).then((answers) => {
-    if(answers.version === '') {
-      NEXT_VERSION = CURRENT_VERSION;
+    if (answers.version === '') {
+      NEXT_VERSION = semver.inc(CURRENT_VERSION, config.deploy.increment);
+      gutil.log(gutil.colors.green(`No version inputted, bump to version ${NEXT_VERSION}`));
     } else {
       NEXT_VERSION = answers.version;
     }
@@ -49,8 +47,10 @@ export function message(done) {
       return true;
     }
   }]).then((answers) => {
-    if(answers.message !== ''){
+    if (answers.message !== '') {
       NEXT_MESSAGE = answers.message;
+    } else {
+      NEXT_MESSAGE = '';
     }
     done();
   });
@@ -58,14 +58,17 @@ export function message(done) {
 
 // Bumps the version number in any file that has one
 export function version() {
-  return gulp.src(VERSIONED_FILES, { base: process.cwd() })
-    //.pipe(replace(CURRENT_VERSION, NEXT_VERSION))
-    .pipe(replace(/("|')version\1\s*:\s*("|')([\d.]+)\2/, `$1version$1:$2${NEXT_VERSION}$2`))
+  return gulp.src(config.deploy.versionFiles, {
+    base: process.cwd()
+  })
+    // .pipe(replace(CURRENT_VERSION, NEXT_VERSION))
+    .pipe(replace(/Version\s*:\s*([\d.]+)/, `Version: ${NEXT_VERSION}`))
+    .pipe(replace(/("|')version\1\s*:\s*("|')([\d.]+)\2/, `$1version$1: $2${NEXT_VERSION}$2`))
     .pipe(gulp.dest('.'));
 }
 
 export function init(done) {
-  config.deploy = true;
+  config.production = true;
   config.init();
 
   done();
@@ -73,39 +76,20 @@ export function init(done) {
 
 // Writes a commit with the changes to the version numbers
 export function commit(done) {
-  let message = `Bump to version ${NEXT_VERSION}`;
+  let message = `Release ${NEXT_VERSION}`;
 
-  if(NEXT_VERSION === CURRENT_VERSION) {
+  if (NEXT_VERSION === CURRENT_VERSION) {
     message = NEXT_MESSAGE;
-  } else {
+  } else if(NEXT_MESSAGE !== '') {
     message = `${message}; ${NEXT_MESSAGE}`;
   }
   exec('git add .');
   exec(`git commit -am "${message}"`);
-  exec(`git tag v${NEXT_VERSION}`);
+
+  if (NEXT_VERSION !== CURRENT_VERSION) {
+    exec(`git tag v${NEXT_VERSION}`);
+  }
+
   exec('git push origin master --follow-tags');
   done();
-}
-
-export function pull(done) {
-  let fail = function (msg) {
-    console.error('Prepare aborted.');
-    console.error(msg);
-    process.exit(1);
-  };
-
-  // Check for uncommitted changes
-  let gitStatusResult = exec('git status --porcelain');
-  if (gitStatusResult.toString().length > 0) {
-    return fail('You have uncommitted changes, please stash or commit them before running prepare');
-  }
-
-  // Pull latest
-  let gitPullResult = spawn('git', ['pull', 'origin', 'master']);
-  if (gitPullResult.status !== 0) {
-    let error = gitPullResult.stderr.toString();
-    return fail(`There was an error running 'git pull':\n${error}`);
-  }
-
-  return done();
 }

@@ -1,21 +1,14 @@
 'use strict';
 
-import argv       from 'argv';
+import {argv} from 'yargs';
 import path       from 'path';
 import pathExists from 'path-exists';
 
 export default function(src, files, argName = 'file') {
-  let args = argv.option([
-    {
-      name: argName,
-      type: 'string'
-    }
-  ]).run();
-
   let srcFiles = '';
 
-  if(args.options[argName] && pathExists.sync(path.join(src, args.options[argName]))) {
-    let arg = args.options[argName];
+  if(argv[argName] && pathExists.sync(path.join(src, argv[argName]))) {
+    let arg = argv[argName];
     srcFiles = `${src}/${arg}`;
   } else if(Array.isArray(files)) {
     srcFiles = files.map((file) => {

@@ -14,12 +14,12 @@ import rollup       from 'gulp-rollup';
 import uglify       from 'gulp-uglify';
 import size         from 'gulp-size';
 import plumber      from 'gulp-plumber';
-import beautify     from '../util/beautify';
+import prettier     from 'gulp-nf-prettier';
 import path         from 'path';
 import notify       from 'gulp-notify';
 import replace      from 'gulp-replace';
 
-export function bundler(src = config.scripts.src, dest = config.scripts.dest, entry = config.scripts.entry, files = config.scripts.files, message = 'Bundler task complete') {
+export function bundler(src = config.scripts.src, dest = config.scripts.dest, input = config.scripts.input, files = config.scripts.files, message = 'Bundler task complete') {
   return function () {
     let srcFiles = getSrcFiles(src, files);
 
@@ -27,7 +27,8 @@ export function bundler(src = config.scripts.src, dest = config.scripts.dest, en
       .on('error', handleErrors)
       .pipe(plumber({errorHandler: handleErrors}))
       .pipe(rollup({
-        entry: `${src}/${entry}`,
+        input: `${src}/${input}`,
+        format: 'es',
         globals: {
           jquery: 'jQuery'
         }
@@ -46,7 +47,7 @@ export function bundler(src = config.scripts.src, dest = config.scripts.dest, en
   };
 }
 
-export function scripts(src = config.scripts.src, dest = config.scripts.dest, entry = config.scripts.entry, files = config.scripts.files, message = 'Scripts task complete') {
+export function scripts(src = config.scripts.src, dest = config.scripts.dest, input = config.scripts.input, files = config.scripts.files, message = 'Scripts task complete') {
   const createSourcemap = config.deploy || config.scripts.prodSourcemap;
 
   return function () {
@@ -56,7 +57,7 @@ export function scripts(src = config.scripts.src, dest = config.scripts.dest, en
       .on('error', handleErrors)
       .pipe(plumber({errorHandler: handleErrors}))
       // .pipe(rollup({
-      //   entry: `${src}/${entry}`
+      //   input: `${src}/${input}`,
       // }))
       .pipe(babel({
         "presets": ["es2015"],
@@ -69,9 +70,16 @@ export function scripts(src = config.scripts.src, dest = config.scripts.dest, en
         ]
       }))
       .pipe(header(config.banner))
-      .pipe(beautify({
-        config: path.join(config.paths.root, '.beautifyrc')
-      }))
+      .pipe(
+        prettier({
+          parser: 'flow',
+          tabWidth: 2,
+          useTabs: false,
+          semi: true,
+          singleQuote: true,
+          bracketSpacing: true,
+        })
+      )
       .pipe(rename({
         basename: config.name
       }))

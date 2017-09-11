@@ -1,8 +1,9 @@
 'use strict';
 
+import config      from './config';
 import fs          from 'graceful-fs';
 import gulp        from 'gulp';
-import config      from './config';
+import gutil       from 'gulp-util';
 
 // Tasks
 import clean                     from './gulp/tasks/clean';
@@ -16,6 +17,12 @@ import * as browser              from './gulp/tasks/browser';
 import * as assets               from './gulp/tasks/assets';
 import archive                   from './gulp/tasks/archive';
 import release                   from './gulp/tasks/release';
+
+if (config.production) {
+  gutil.log(gutil.colors.bold.green('�  Production Mode'));
+} else {
+  gutil.log(gutil.colors.bold.green('�  Development Mode'));
+}
 
 gulp.task('version', version());
 gulp.task('bundler', bundler());
@@ -34,22 +41,14 @@ gulp.task('assets', assets.copy());
 gulp.task('clean:assets', assets.clean());
 
 // Lint Styles
-gulp.task('lint:css', lintStyles.css());
-gulp.task('lint:scss', lintStyles.scss());
 gulp.task('lint:style', lintStyles.style());
 
 // Lint Scripts
-gulp.task('lint:es:src', lintScripts.es(config.scripts.src));
-gulp.task('lint:es:dest', lintScripts.es(config.scripts.dest));
-gulp.task('lint:es:test', lintScripts.es(config.scripts.test));
-gulp.task('lint:es:gulp', lintScripts.es(config.scripts.gulp, {rules: {'no-console': 'off'}}));
-gulp.task('lint:es', gulp.series('lint:es:src', 'lint:es:dest', 'lint:es:test', 'lint:es:gulp'));
-
-gulp.task('lint:js:src', lintScripts.js(config.scripts.src));
-gulp.task('lint:js:dest', lintScripts.js(config.scripts.dest));
-gulp.task('lint:js:test', lintScripts.js(config.scripts.test));
-gulp.task('lint:js:gulp', lintScripts.js(config.scripts.gulp));
-gulp.task('lint:js', gulp.series('lint:js:src', 'lint:js:dest', 'lint:js:test', 'lint:js:gulp'));
+gulp.task('lint:script:src', lintScripts.es(config.scripts.src));
+gulp.task('lint:script:dest', lintScripts.es(config.scripts.dest));
+gulp.task('lint:script:test', lintScripts.es(config.scripts.test));
+gulp.task('lint:script:gulp', lintScripts.es(config.scripts.gulp, {rules: {'no-console': 'off'}}));
+gulp.task('lint:script', gulp.series('lint:script:src', 'lint:script:dest', 'lint:script:test', 'lint:script:gulp'));
 
 // Run karma for development, will watch and reload
 gulp.task('tdd', test());
@@ -73,7 +72,6 @@ gulp.task('deploy:version', deploy.version);
 gulp.task('deploy:message', deploy.message);
 gulp.task('deploy:init', deploy.init);
 gulp.task('deploy:commit', deploy.commit);
-gulp.task('deploy:pull', deploy.pull);
 
 // Generates compiled CSS and JS files and puts them in the dist/ folder
 gulp.task('deploy:dist', gulp.series('build'));
@@ -98,5 +96,8 @@ gulp.task('watch', () => {
 // Release task
 gulp.task('release', release());
 
+// Dev task
+gulp.task('dev', gulp.series('build', 'serve'));
+
 // Register default task
-gulp.task('default', gulp.series('lint:es:src', 'serve'));
+gulp.task('default', gulp.series('lint:script:src', 'serve'));

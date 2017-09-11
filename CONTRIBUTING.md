@@ -175,8 +175,7 @@ We are using node, gulp and babel to build and (in the future) test this project
 - `gulp clean` Clean output directories.
 - `gulp bundler` Bundle javasript modules.
 - `gulp scripts` Concatenate and minify JavaScript to `dist`.
-- `gulp lint:es` Lint ES6 files using eslint.
-- `gulp lint:js` Lint Javascript files using jshint.
+- `gulp lint:script` Lint ES6 files using eslint.
 - `gulp clean` Clean out distribution javascript files.
 - `gulp tdd` Test for Test Driven Development purposes.
 - `gulp test` Test for Continuous Integration purposes.

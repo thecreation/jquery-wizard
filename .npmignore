@@ -1,4 +1,6 @@
 .travis.xml
+yarn.lock
+package-lock.json
 .editorconfig
 .babelrc
 .beautifyrc

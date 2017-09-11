@@ -1,5 +1,5 @@
 /**
-* jQuery wizard v0.4.3
+* jQuery wizard v0.4.4
 * https://github.com/amazingSurge/jquery-wizard
 *
 * Copyright (c) amazingSurge
@@ -844,7 +844,7 @@ $(document).on('click', '[data-wizard]', function (e) {
 });
 
 var info = {
-  version:'0.4.3'
+  version:'0.4.4'
 };
 
 const NAMESPACE = 'wizard';

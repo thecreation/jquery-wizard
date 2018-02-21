@@ -48,7 +48,10 @@ class wizard {
         that.goTo(index);
       }
 
-      e.preventDefault();
+      if (e.target.type !== "checkbox" && (e.target.type !== "radio")) {
+          e.preventDefault();
+      }
+      
       e.stopPropagation();
     });
 
